@@ -1,6 +1,7 @@
 
 import WikiGame from "./wikigame";
 
+
 function GameRoom() {
   return (
     <div className="GameContainer">
