@@ -1,0 +1,127 @@
+:root {
+    --primary-color: #5651F6;
+    --secondary-color: #000000;
+}
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Iceberg&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:wght@300&display=swap');
+* {
+    
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+   
+}
+
+.bg {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    background: url(../assets/bg.svg);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    overflow: hidden;
+}
+
+
+.container {
+    display: flex;
+    flex-direction: column;
+ gap: 10vh;
+    align-items: center;
+    height: 100vh;
+}
+
+button:hover {
+    scale: 1.05;
+    box-shadow: 0px 4px 7.3px 10px rgba(0, 0, 0, 0.10);
+}
+.GameName {
+    text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    -webkit-text-stroke-width: 2px;
+    -webkit-text-stroke-color: #000;
+    font-family: Iceberg;
+    font-size: 128px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    background: linear-gradient(130deg, #241ECB 33.36%, #000 70.06%);
+background-clip: text;
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+}
+
+.astro {
+    position: absolute;
+    bottom: 10vh;
+    left: 5vw;
+    min-width: 10vw;
+    width: 150px;
+    height: auto;
+    z-index: 20;
+ 
+}
+
+@keyframes station {
+    0% {
+        transform: translate(0, 0);
+        rotate: 10deg;
+    }
+    100% {
+        transform: translate(0, 10vh);
+        
+    }
+}
+  .station {
+    animation: station 2s infinite alternate; 
+  }
+
+
+.partynumber {
+    border-radius: 40px;
+    min-width: 10vw;
+    width: 150px;
+    height: auto;
+    z-index: 20;
+    font-family: 'Instrument Serif', serif;
+    font-size: 2vw;
+    letter-spacing: 0.5vw;
+    text-align: center;
+}
+
+
+
+.partycode {
+  
+    min-width: 10vw;
+    width: 150px;
+    height: auto;
+    z-index: 20;
+    font-family: 'Instrument Serif', serif;
+    font-size: 4vw;
+    letter-spacing: 1vw;
+   
+}
+
+.table-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+table {
+    border-collapse: collapse;
+    width: 80%;
+    margin: 10VH auto;
+}
+
+th, td {
+ 
+    padding: 8px;
+    text-align: center;
+}
+
+
+
