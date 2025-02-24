@@ -1,7 +1,7 @@
 
 import './App.css'
 import Accueil from './component/accueil.tsx'
- 
+ // import WikiGame from './component/WikiGame.tsx'
 
 function App() {
 
@@ -10,6 +10,7 @@ function App() {
   
       <div>
       <Accueil />
+     
     </div>
   )
 }
