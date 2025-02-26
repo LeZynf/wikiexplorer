@@ -1,0 +1,174 @@
+.lobbygrid {
+    display: grid;
+    grid-template-columns: repeat(15, 1fr);
+    grid-template-rows: repeat(20, 1fr);
+    grid-column-gap: 0;
+    grid-row-gap: 0;
+    width: 100vw;
+    height: 100vh;
+    }
+         
+    .paramlob { grid-area: 7 / 6 / 16 / 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 1.2rem;
+        text-align: left;
+    }
+
+    .hostlob { grid-area: 5 / 6 / 6 / 10;
+        text-align: center;
+        justify-content: center;
+       }
+
+
+
+    .playerlob {
+    grid-area: 5 / 2 / 11 / 5;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+    gap: 1vh;
+    align-items: center;
+    text-align: center;
+    }
+
+    .border{
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.20);
+        border-radius: 20px;
+        border: 2px solid #5651F6;
+    }
+
+    .bouttonback { grid-area: 17 / 6 / 19 / 10;
+       }
+
+  
+    .buttonplay { grid-area: 17 / 11 / 19 / 15;
+    
+    }
+
+    .buttonplay , .bouttonback {
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .chatlob { 
+        grid-area: 12 / 2 / 19 / 5; 
+        text-align: left;
+        overflow-y: auto;
+        word-wrap: break-word;
+        font-size: 1rem;
+        padding-left: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding-top: 10px;
+        align-items: center;
+    }
+    .chatlob input{
+        width: 90%;
+        height: 10%;
+        background: rgba(0, 0, 0, 0.20);
+        border-radius: 20px;
+        border: 2px solid #5651F6;
+        padding: 10px;
+        font-family: 'Instrument Serif', serif;
+        font-size: 1.5rem;
+        color: black;
+        margin-bottom: 10px;
+    }
+
+    .playerlob::-webkit-scrollbar, .chatlob::-webkit-scrollbar {
+        width: 12px;
+        border-radius: 40px;
+
+    }
+
+    .playerlob::-webkit-scrollbar-track, .chatlob::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-top-left-radius: 0 !important;
+        border-bottom-left-radius: 0 !important;
+    }
+
+    .playerlob::-webkit-scrollbar-thumb, .chatlob::-webkit-scrollbar-thumb {
+        background: var(--primary-color);
+        border-radius: 40px;
+
+    }
+
+    .playerlob::-webkit-scrollbar-thumb:hover, .chatlob::-webkit-scrollbar-thumb:hover {
+        background: rgb(15, 14, 15, 0.3);
+    }
+    .artefactlob { grid-area: 7 / 11 / 16 / 15; 
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-around;
+
+    }
+
+    .artefactlob div {
+        width: 30%;
+        height: 40%;
+        background: rgba(0, 0, 0, 0.20);
+        border-radius: 20px;
+        border: 2px solid #5651F6;
+    
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        justify-content: center;
+        font-family: 'Instrument Serif', serif;
+        font-size: 2vw;
+        color: black;
+    }
+    .titlelob { grid-area: 2 / 4 / 4 / 13; 
+        text-align: center;
+        font-size: 3rem;
+        translate: -1vw;
+    }
+    .codelob {grid-area: 5 / 11 / 6 / 15;
+       text-align: center;
+    }
+
+    h2 {
+        font-size: 2rem;
+        -webkit-text-stroke-width: 2px;
+        -webkit-text-stroke-color: #000;
+        font-family: "Instrument Serif";
+
+        font-style: italic;
+        font-weight: 400;
+        line-height: normal;
+    }
+    .playerbubble {
+        width: 80%;
+       
+        background: rgba(0, 0, 0, 0.20);
+        border-radius: 20px;
+        border: 2px solid #5651F6;
+       
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        justify-content: center;
+        font-family: 'Instrument Serif', serif;
+        font-size: 1.5rem;
+        color: black;
+    }
+    .playerbubble:hover {
+        background: rgba(0, 0, 0, 0.30);
+        scale: 1.05;
+    } 
+
+    .bouttonback button, .buttonplay button {
+        font-size: 2vw;
+    }
