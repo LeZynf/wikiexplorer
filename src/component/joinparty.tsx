@@ -54,20 +54,22 @@ function JoinParty({ onBack }: JoinPartyProps) {
       
       {/* Affichage du pop-up pour choisir un pseudo */}
       {isChoosingPseudo ? (
-        <div className="pseudo-popup">
-          <h2>Choisissez votre pseudo</h2>
-          <input
-            type="text"
-            value={pseudo}
-            onChange={handlePseudoChange}
-            placeholder="Entrez votre pseudo"
-          />
-          <button
-            onClick={() => setIsChoosingPseudo(false)}
-            disabled={!pseudo}
-          >
-            Valider
-          </button>
+        <div className="pseudo-modal">
+          <div className="pseudo-modal-content">
+            <h2>Entrez votre pseudo</h2>
+            <input
+              type="text"
+              placeholder="Entrez votre pseudo"
+              value={pseudo}
+              onChange={handlePseudoChange}
+            />
+            <button
+              onClick={() => setIsChoosingPseudo(false)}
+              disabled={!pseudo}
+            >
+              Valider
+            </button>
+          </div>
         </div>
       ) : (
         <div className="table-container">

@@ -114,16 +114,18 @@ const Lobby: React.FC<LobbyProps> = () => {
   <div>1</div>
   <div>1</div>
   <div>1</div>
+  <div>1</div>
+  <div>1</div>
 </div>
 <div className='playerlob border'>
-      <h3>Joueurs dans la party :</h3>
+      <h2>Joueurs dans la party :</h2>
       
         {players.map((player, index) => (
           <div className='playerbubble' key={index}>{player}</div>
         ))}
       
 </div>
-<div className='chatlob border'> <div className='chat'><p>bonjour </p><p>bonjour </p><p>bonjour </p></div>
+<div className='chatlob border'>  <div className='chat'><p>bonjour </p><p>bonjour </p><p>bonjour </p></div>
 <input type="text" />
 </div>
 <div className='bouttonback'><button>BACK</button></div>

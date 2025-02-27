@@ -8,7 +8,7 @@
     height: 100vh;
     }
          
-    .paramlob { grid-area: 7 / 6 / 16 / 10;
+    .paramlob { grid-area: 7 / 6 / 16 / 9;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -42,11 +42,11 @@
         border: 2px solid #5651F6;
     }
 
-    .bouttonback { grid-area: 17 / 6 / 19 / 10;
+    .bouttonback { grid-area: 17 / 11 / 19 / 15;
        }
 
   
-    .buttonplay { grid-area: 17 / 11 / 19 / 15;
+    .buttonplay { grid-area: 17 / 6 / 19 / 10;
     
     }
 
@@ -71,6 +71,22 @@
         padding-top: 10px;
         align-items: center;
     }
+    .chat {
+      width: 100%;
+      overflow-y: auto;
+    }
+
+    .chatlob p {
+        width: 90%;
+        background: rgba(0, 0, 0, 0.20);
+        border-radius: 20px;
+        border: 2px solid #5651F6;
+        padding: 2px 10px;
+        font-family: 'Instrument Serif', serif;
+        font-size: 1rem;
+        color: black;
+        margin-bottom: 10px;
+    }
     .chatlob input{
         width: 90%;
         height: 10%;
@@ -84,38 +100,38 @@
         margin-bottom: 10px;
     }
 
-    .playerlob::-webkit-scrollbar, .chatlob::-webkit-scrollbar {
+    .playerlob::-webkit-scrollbar, .chat::-webkit-scrollbar {
         width: 12px;
         border-radius: 40px;
 
     }
 
-    .playerlob::-webkit-scrollbar-track, .chatlob::-webkit-scrollbar-track {
+    .playerlob::-webkit-scrollbar-track, .chat::-webkit-scrollbar-track {
         background: #f1f1f1;
         border-top-left-radius: 0 !important;
         border-bottom-left-radius: 0 !important;
     }
 
-    .playerlob::-webkit-scrollbar-thumb, .chatlob::-webkit-scrollbar-thumb {
+    .playerlob::-webkit-scrollbar-thumb, .chat::-webkit-scrollbar-thumb {
         background: var(--primary-color);
         border-radius: 40px;
 
     }
 
-    .playerlob::-webkit-scrollbar-thumb:hover, .chatlob::-webkit-scrollbar-thumb:hover {
+    .playerlob::-webkit-scrollbar-thumb:hover, .chat::-webkit-scrollbar-thumb:hover {
         background: rgb(15, 14, 15, 0.3);
     }
-    .artefactlob { grid-area: 7 / 11 / 16 / 15; 
+    .artefactlob { grid-area: 7 / 10 / 16 / 15; 
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
         align-items: center;
         justify-content: space-around;
-
+gap: 5px;
     }
 
     .artefactlob div {
-        width: 30%;
+        width: 20%;
         height: 40%;
         background: rgba(0, 0, 0, 0.20);
         border-radius: 20px;
@@ -171,4 +187,6 @@
 
     .bouttonback button, .buttonplay button {
         font-size: 2vw;
+        background: rgba(255, 255, 255, 0.3);
+    
     }
