@@ -77,9 +77,7 @@ function WikiGame() {
                 <div className="player-frame">
                     <h2>Joueurs</h2>
                     <div className="players-list">
-                        {players.map((player, index) => (
-                            <div className="player" key={index}>{player}</div>
-                        ))}
+                        <p>Pepito</p>
                     </div>
                 </div>
                 <div className="chat-frame">
