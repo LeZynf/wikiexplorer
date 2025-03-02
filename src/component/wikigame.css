@@ -107,14 +107,40 @@ body {
 .players-list {
     display: flex;
     flex-direction: column;
+    gap: 10px; /* Espacement entre les joueurs */
 }
 
 .player {
     background: rgba(100, 100, 255, 0.5);
-    padding: 10px;
     border-radius: 5px;
-    margin: 5px 0;
-    text-align: center;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.player-info {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Espacement entre le nombre et le pseudo */
+}
+
+.objective-count {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ffcc00; /* Couleur jaune pour le nombre */
+}
+
+.player-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff; /* Texte en blanc */
+}
+
+.current-article {
+    font-size: 14px;
+    color: #ccc; /* Texte en gris clair */
+    margin-top: 5px; /* Espacement entre le pseudo et l'article */
 }
 
 .chat-frame {

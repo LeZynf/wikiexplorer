@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import "./WikiGame.css";
+import {useParams} from "react-router-dom";
 
 function WikiGame() {
     const [currentPage, setCurrentPage] = useState("");
     const [targetPage, setTargetPage] = useState("");
     const [history, setHistory] = useState<string[]>([]);
     const [content, setContent] = useState("");
+    const [players, setPlayers] = useState<{ name: string, currentArticle: string, objectiveCount: number }[]>([]);
+    const { partyCode } = useParams<{ partyCode: string }>();
 
     useEffect(() => {
         const fetchRandomPage = async () => {
@@ -42,6 +45,29 @@ function WikiGame() {
         fetchWikiContent();
     }, [currentPage]);
 
+    useEffect(() => {
+        const fetchPlayers = async () => {
+            try {
+                const response = await fetch(`http://localhost:5000/party/${partyCode}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    // Transformer les joueurs en objets avec les propriétés nécessaires
+                    const transformedPlayers = data.party.players.map((player: string) => ({
+                        name: player,
+                        currentArticle: "En attente...", // Valeur par défaut
+                        objectiveCount: 0, // Valeur par défaut
+                    }));
+                    setPlayers(transformedPlayers);
+                }
+            } catch (error) {
+                console.error("Erreur lors de la récupération des joueurs", error);
+            }
+        };
+
+        fetchPlayers();
+    }, [partyCode]);
+
     return (
         <div className="wiki-game">
             <div className="left-panel">
@@ -71,13 +97,21 @@ function WikiGame() {
                 <div className="code-frame">
                     <h2>Code</h2>
                     <div className="code-box">
-                        <p>code:257894</p>
+                        <p>Code:{partyCode}</p>
                     </div>
                 </div>
                 <div className="player-frame">
                     <h2>Joueurs</h2>
                     <div className="players-list">
-                        <p>Pepito</p>
+                        {players.map((player, index) => (
+                            <div className="player" key={index}>
+                                <div className="player-info">
+                                    <span className="objective-count">{player.objectiveCount}</span>
+                                    <span className="player-name">{player.name}</span>
+                                </div>
+                                <div className="current-article">{player.currentArticle}</div>
+                            </div>
+                        ))}
                     </div>
                 </div>
                 <div className="chat-frame">
