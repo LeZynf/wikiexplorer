@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom'; // Add this import
 import './accueil.css';
 import astro from '../assets/astro.svg';
 import JoinParty from './joinparty';
@@ -7,6 +8,7 @@ import Lobby from './lobby'; // Assure-toi d'importer ton composant Lobby
 
 
 function Accueil() {
+  const navigate = useNavigate(); // Add this hook
   const [showJoinParty, setShowJoinParty] = useState(false);
   const [partyCode, setPartyCode] = useState('');  // Pour stocker le code de la party
   const [creatorName, setCreatorName] = useState('');  // Le créateur de la party
@@ -24,9 +26,10 @@ function Accueil() {
     setShowLobby(false); // Réinitialiser l'affichage du lobby
   };
   // Fonction pour créer une party
+  // Modify the handleCreateParty function
   const handleCreateParty = async () => {
     if (!creatorName) {
-      setShowPseudoModal(true); // Afficher la modal si le nom n'est pas défini
+      setShowPseudoModal(true);
       return;
     }
     try {
@@ -35,7 +38,7 @@ function Accueil() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           creator: creatorName,
-          settings: { difficulty: 'normal' },  // Par exemple, un paramètre pour la difficulté
+          settings: { difficulty: 'normal' },
         }),
       });
 
@@ -45,9 +48,13 @@ function Accueil() {
 
       const data = await response.json();
       if (data.success) {
-        setPartyCode(data.partyCode || '');  // Enregistrer le code de la party dans l'état
-        setShowLobby(true);  // Afficher le lobby après la création
-        console.log("Code de la party :", data.partyCode);
+        // Store player name in localStorage for consistency
+        localStorage.setItem('playerName', creatorName);
+        
+        // Instead of showing the lobby conditionally, navigate to the lobby route
+        navigate(`/lobby/${data.partyCode}`, { 
+          state: { playerName: creatorName }
+        });
       } else {
         console.error('Error in response data:', data);
       }
@@ -81,16 +88,6 @@ function Accueil() {
             transition={{ duration: 1 }}
           >
             <JoinParty onBack={handleBackClick} />
-          </motion.div>
-        ) : showLobby ? (
-          <motion.div
-            key="lobby"
-            initial={{ opacity: 0, x: 100 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -100 }}
-            transition={{ duration: 1 }}
-          >
-            <Lobby  />
           </motion.div>
         ) : (
           <motion.div
