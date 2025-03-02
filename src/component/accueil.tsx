@@ -100,7 +100,7 @@ function Accueil() {
             <div className="container">
               <h1 className="GameName">WikiExplorer</h1>
               <div className="ButtonHolder">
-                <li><button>Solo</button></li>
+                <li>  <button onClick={() => navigate('/sologame')}>Solo</button></li>
                 <li><button onClick={handleCreateParty}>Create Party</button></li>
                 <li><button onClick={handleJoinPartyClick}>Join Party</button></li>
               </div>

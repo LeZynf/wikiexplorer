@@ -5,6 +5,7 @@ import JoinParty from './component/joinparty';
 import Lobby from './component/lobby';
 import WikiGame from './component/wikigame';
 import { useParams as useReactRouterParams } from 'react-router-dom';
+import SoloGame from "./component/sologame.tsx";
 
 // Wrapper component to pass location state to Lobby
 function LobbyWrapper() {
@@ -27,6 +28,7 @@ function App() {
         <Route path="/lobby/:partyCode" element={<LobbyWrapper />} />
         <Route path="/lobby" element={<Lobby />} />
         <Route path="/wikigame" element={<WikiGame />} />
+        <Route path="/sologame" element={<SoloGame />} />
       </Routes>
     </Router>
   );
