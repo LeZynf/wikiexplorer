@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import "./WikiGame.css";
-import {useParams} from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 function WikiGame() {
     const [currentPage, setCurrentPage] = useState("");
@@ -8,16 +8,18 @@ function WikiGame() {
     const [history, setHistory] = useState<string[]>([]);
     const [content, setContent] = useState("");
     const [players, setPlayers] = useState<{ name: string, currentArticle: string, objectiveCount: number }[]>([]);
+    const [objectivesCompleted, setObjectivesCompleted] = useState(0);
+    const [sitesToVisit, setSitesToVisit] = useState(5); // Valeur par défaut, à récupérer depuis le lobby
     const { partyCode } = useParams<{ partyCode: string }>();
 
     useEffect(() => {
         const fetchRandomPage = async () => {
             try {
-                const response = await fetch("https://en.wikipedia.org/api/rest_v1/page/random/title");
+                const response = await fetch("https://fr.wikipedia.org/api/rest_v1/page/random/title");
                 const data = await response.json();
                 setCurrentPage(data.items[0].title);
 
-                const responseTarget = await fetch("https://en.wikipedia.org/api/rest_v1/page/random/title");
+                const responseTarget = await fetch("https://fr.wikipedia.org/api/rest_v1/page/random/title");
                 const dataTarget = await responseTarget.json();
                 setTargetPage(dataTarget.items[0].title);
             } catch (error) {
@@ -32,7 +34,7 @@ function WikiGame() {
         const fetchWikiContent = async () => {
             try {
                 const response = await fetch(
-                    `https://en.wikipedia.org/api/rest_v1/page/html/${encodeURIComponent(currentPage)}`
+                    `https://fr.wikipedia.org/api/rest_v1/page/html/${encodeURIComponent(currentPage)}`
                 );
                 if (!response.ok) throw new Error("Erreur de récupération");
                 const htmlContent = await response.text();
@@ -59,6 +61,9 @@ function WikiGame() {
                         objectiveCount: 0, // Valeur par défaut
                     }));
                     setPlayers(transformedPlayers);
+
+                    // Récupérer le nombre d'objectifs depuis le lobby
+                    setSitesToVisit(data.party.settings.sitesToVisit);
                 }
             } catch (error) {
                 console.error("Erreur lors de la récupération des joueurs", error);
@@ -67,6 +72,41 @@ function WikiGame() {
 
         fetchPlayers();
     }, [partyCode]);
+
+    useEffect(() => {
+        if (!currentPage || !targetPage) return;
+
+        if (currentPage === targetPage) {
+            // Objectif atteint
+            setObjectivesCompleted((prev) => prev + 1);
+
+            // Mettre à jour le compteur d'objectifs pour le joueur actuel
+            setPlayers((prevPlayers) =>
+                prevPlayers.map((player) =>
+                    player.name === "Pepito" // Remplacez "Pepito" par le joueur actuel
+                        ? { ...player, objectiveCount: player.objectiveCount + 1 }
+                        : player
+                )
+            );
+
+            // Changer l'objectif si le nombre d'objectifs n'est pas encore atteint
+            if (objectivesCompleted < sitesToVisit - 1) {
+                const fetchNewTargetPage = async () => {
+                    try {
+                        const response = await fetch("https://fr.wikipedia.org/api/rest_v1/page/random/title");
+                        const data = await response.json();
+                        setTargetPage(data.items[0].title);
+                    } catch (error) {
+                        console.error("Erreur lors du chargement de la nouvelle page objectif", error);
+                    }
+                };
+                fetchNewTargetPage();
+            } else {
+                // Tous les objectifs sont atteints
+                console.log("Tous les objectifs sont atteints !");
+            }
+        }
+    }, [currentPage, targetPage, objectivesCompleted, sitesToVisit]);
 
     return (
         <div className="wiki-game">
@@ -90,6 +130,7 @@ function WikiGame() {
                 <div className="artifacts-bar">
                     <h2>Artéfacts</h2>
                     <div className="artifact-bar">
+                        <p>Objectifs atteints : {objectivesCompleted}/{sitesToVisit}</p>
                     </div>
                 </div>
             </div>
@@ -97,7 +138,7 @@ function WikiGame() {
                 <div className="code-frame">
                     <h2>Code</h2>
                     <div className="code-box">
-                        <p>Code:{partyCode}</p>
+                        <p>{partyCode}</p>
                     </div>
                 </div>
                 <div className="player-frame">
