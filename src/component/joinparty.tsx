@@ -41,8 +41,11 @@ function JoinParty({ onBack }: JoinPartyProps) {
     const data = await response.json();
   
     if (data.success) {
+      // Stocker le pseudo dans localStorage pour qu'il soit accessible dans le Lobby
+      localStorage.setItem('playerName', pseudo);
+      
       // Redirection vers le lobby avec le code de la partie
-      navigate(`/lobby/${partyCode}`);
+      navigate(`/lobby/${partyCode}`, { state: { playerName: pseudo } });
     } else {
       alert("Erreur : impossible de rejoindre la partie.");
     }
