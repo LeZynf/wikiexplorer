@@ -129,6 +129,11 @@ const Lobby: React.FC<LobbyProps> = ({ partyCode: propPartyCode, playerName: pro
   const handleStartGame = () => {
     console.log('La partie commence avec les paramètres :', settings);
     // Logique pour démarrer la partie, envoyer un signal au backend pour débuter le jeu
+    if (partyCode) {
+      navigate(`/wikigame/${partyCode}`);
+    } else {
+      console.error('Le code de la partie est manquant.');
+    }
   };
   
   // Fonction pour quitter la partie et retourner à l'accueil

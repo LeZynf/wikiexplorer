@@ -181,3 +181,14 @@ body {
     border-radius: 5px;
     padding: 10px;
 }
+
+.popup-content button {
+    margin-top: 20px;
+    padding: 5px 10px; /* Réduire la taille du padding */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    color: black;
+    font-weight: bold;
+    font-size: 14px; /* Réduire la taille de la police */
+}

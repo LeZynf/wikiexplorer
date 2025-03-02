@@ -12,6 +12,11 @@ function WikiGame() {
     const [sitesToVisit, setSitesToVisit] = useState(5); // Valeur par défaut, à récupérer depuis le lobby
     const { partyCode } = useParams<{ partyCode: string }>();
 
+    // États pour gérer le pop-up
+    const [selectedPlayer, setSelectedPlayer] = useState<{ name: string, visitedArticles: string[] } | null>(null);
+    const [showPopup, setShowPopup] = useState(false);
+
+    // Récupérer une page aléatoire au démarrage
     useEffect(() => {
         const fetchRandomPage = async () => {
             try {
@@ -29,6 +34,7 @@ function WikiGame() {
         fetchRandomPage();
     }, []);
 
+    // Récupérer le contenu de la page actuelle
     useEffect(() => {
         if (!currentPage) return;
         const fetchWikiContent = async () => {
@@ -39,7 +45,14 @@ function WikiGame() {
                 if (!response.ok) throw new Error("Erreur de récupération");
                 const htmlContent = await response.text();
                 setContent(htmlContent);
-                setHistory((prev) => [...prev, currentPage]);
+
+                // Ajouter la page actuelle à l'historique seulement si elle n'est pas déjà présente
+                setHistory((prev) => {
+                    if (!prev.includes(currentPage)) {
+                        return [...prev, currentPage];
+                    }
+                    return prev;
+                });
             } catch (error) {
                 console.error(error);
             }
@@ -47,6 +60,7 @@ function WikiGame() {
         fetchWikiContent();
     }, [currentPage]);
 
+    // Récupérer les joueurs depuis le lobby
     useEffect(() => {
         const fetchPlayers = async () => {
             try {
@@ -73,6 +87,7 @@ function WikiGame() {
         fetchPlayers();
     }, [partyCode]);
 
+    // Vérifier si la page actuelle correspond à l'objectif
     useEffect(() => {
         if (!currentPage || !targetPage) return;
 
@@ -107,6 +122,21 @@ function WikiGame() {
             }
         }
     }, [currentPage, targetPage, objectivesCompleted, sitesToVisit]);
+
+    // Gérer le clic sur un joueur
+    const handlePlayerClick = (playerName: string) => {
+        // Récupérer les articles visités par le joueur (en utilisant l'historique)
+        const visitedArticles = history; // Utilisez l'historique complet ou filtrez selon le joueur si nécessaire
+
+        // Mettre à jour l'état avec les informations du joueur
+        setSelectedPlayer({
+            name: playerName,
+            visitedArticles: visitedArticles,
+        });
+
+        // Afficher le pop-up
+        setShowPopup(true);
+    };
 
     return (
         <div className="wiki-game">
@@ -145,7 +175,7 @@ function WikiGame() {
                     <h2>Joueurs</h2>
                     <div className="players-list">
                         {players.map((player, index) => (
-                            <div className="player" key={index}>
+                            <div className="player" key={index} onClick={() => handlePlayerClick(player.name)}>
                                 <div className="player-info">
                                     <span className="objective-count">{player.objectiveCount}</span>
                                     <span className="player-name">{player.name}</span>
@@ -161,6 +191,21 @@ function WikiGame() {
                     </div>
                 </div>
             </div>
+
+            {/* Pop-up pour afficher les articles visités par un joueur */}
+            {showPopup && selectedPlayer && (
+                <div className="popup-overlay">
+                    <div className="popup-content">
+                        <h2>Articles visités par {selectedPlayer.name}</h2>
+                        <ul>
+                            {selectedPlayer.visitedArticles.map((article, index) => (
+                                <li key={index}>{article}</li>
+                            ))}
+                        </ul>
+                        <button onClick={() => setShowPopup(false)}>Fermer</button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

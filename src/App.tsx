@@ -27,7 +27,7 @@ function App() {
         <Route path="/join-party" element={<JoinParty onBack={() => { /* handle back action */ }} />} />
         <Route path="/lobby/:partyCode" element={<LobbyWrapper />} />
         <Route path="/lobby" element={<Lobby />} />
-        <Route path="/wikigame" element={<WikiGame />} />
+        <Route path="/wikigame/:partyCode" element={<WikiGame />} />
         <Route path="/sologame" element={<SoloGame />} />
       </Routes>
     </Router>
