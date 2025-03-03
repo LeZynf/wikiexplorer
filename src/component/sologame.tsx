@@ -5,57 +5,37 @@ function SoloGame() {
     const [currentPage, setCurrentPage] = useState("");
     const [targetPage, setTargetPage] = useState("");
     const [history, setHistory] = useState<string[]>([]);
+    const [currentIndex, setCurrentIndex] = useState(-1);
     const [content, setContent] = useState("");
     const [objectivesCompleted, setObjectivesCompleted] = useState(0);
-    const [sitesToVisit, setSitesToVisit] = useState(5); // Nombre d'objectifs à atteindre
+    const [sitesToVisit, setSitesToVisit] = useState(1);
 
-    // Récupérer une page aléatoire au démarrage
+    const fetchRandomPage = async () => {
+        try {
+            const response = await fetch("https://fr.wikipedia.org/api/rest_v1/page/random/title");
+            const data = await response.json();
+            return data.items[0].title;
+        } catch (error) {
+            console.error("Erreur lors du chargement d'une page aléatoire", error);
+            return null;
+        }
+    };
+
+    const initGame = async () => {
+        const startPage = await fetchRandomPage();
+        const newTargetPage = await fetchRandomPage();
+        if (startPage && newTargetPage) {
+            setCurrentPage(startPage);
+            setTargetPage(newTargetPage);
+            setHistory([startPage]);
+            setCurrentIndex(0);
+        }
+    };
+
     useEffect(() => {
-        const fetchRandomPage = async () => {
-            try {
-                const response = await fetch("https://fr.wikipedia.org/api/rest_v1/page/random/title");
-                const data = await response.json();
-                setCurrentPage(data.items[0].title);
-
-                const responseTarget = await fetch("https://fr.wikipedia.org/api/rest_v1/page/random/title");
-                const dataTarget = await responseTarget.json();
-                setTargetPage(dataTarget.items[0].title);
-            } catch (error) {
-                console.error("Erreur lors du chargement de la page aléatoire", error);
-            }
-        };
-        fetchRandomPage();
+        initGame();
     }, []);
 
-    // Vérifier si la page actuelle correspond à l'objectif
-    useEffect(() => {
-        if (!currentPage || !targetPage) return;
-
-        if (currentPage === targetPage) {
-            // Objectif atteint
-            setObjectivesCompleted((prev) => prev + 1); // Ajouter 1 aux objectifs complétés
-            setSitesToVisit((prev) => prev - 1); // Enlever 1 aux sites restants
-
-            // Changer l'objectif si le nombre d'objectifs n'est pas encore atteint
-            if (sitesToVisit > 1) {
-                const fetchNewTargetPage = async () => {
-                    try {
-                        const response = await fetch("https://fr.wikipedia.org/api/rest_v1/page/random/title");
-                        const data = await response.json();
-                        setTargetPage(data.items[0].title);
-                    } catch (error) {
-                        console.error("Erreur lors du chargement de la nouvelle page objectif", error);
-                    }
-                };
-                fetchNewTargetPage();
-            } else {
-                // Tous les objectifs sont atteints
-                console.log("Tous les objectifs sont atteints !");
-            }
-        }
-    }, [currentPage, targetPage, sitesToVisit]);
-
-    // Récupérer le contenu de la page actuelle
     useEffect(() => {
         if (!currentPage) return;
         const fetchWikiContent = async () => {
@@ -67,19 +47,52 @@ function SoloGame() {
                 const htmlContent = await response.text();
                 setContent(htmlContent);
 
-                // Ajouter la page actuelle à l'historique seulement si elle n'est pas déjà présente
-                setHistory((prev) => {
-                    if (!prev.includes(currentPage)) {
-                        return [...prev, currentPage];
-                    }
-                    return prev;
-                });
+                if (history[history.length - 1] !== currentPage) {
+                    setHistory((prev) => [...prev, currentPage]);
+                    setCurrentIndex((prev) => prev + 1);
+                }
+
+                handleObjectiveCompletion();
             } catch (error) {
                 console.error(error);
+                setContent("<p>Erreur lors du chargement de la page.</p>");
             }
         };
         fetchWikiContent();
     }, [currentPage]);
+
+    const handleLinkClick = (e: React.MouseEvent) => {
+        const target = e.target as HTMLAnchorElement;
+        if (target.tagName === "A") {
+            e.preventDefault();
+            const newPage = decodeURIComponent(target.href.split("/wiki/")[1] || "");
+            if (newPage) {
+                setCurrentPage(newPage);
+            }
+        }
+    };
+
+    const goBack = () => {
+        if (currentIndex > 0) {
+            setCurrentIndex(currentIndex - 1);
+            setCurrentPage(history[currentIndex - 1]);
+        }
+    };
+
+    const goForward = () => {
+        if (currentIndex < history.length - 1) {
+            setCurrentIndex(currentIndex + 1);
+            setCurrentPage(history[currentIndex + 1]);
+        }
+    };
+
+    const handleObjectiveCompletion = () => {
+        if (currentPage === targetPage) {
+            setObjectivesCompleted((prev) => prev + 1);
+            setSitesToVisit((prev) => Math.max(0, prev - 1));
+            setTimeout(initGame, 2000);
+        }
+    };
 
     return (
         <div className="wiki-game">
@@ -87,22 +100,18 @@ function SoloGame() {
                 <div className="wiki-frame">
                     <h1>WikiExplorer</h1>
                     <h2>Objectif : {targetPage}</h2>
+                    <div className="navigation-buttons">
+                        <button onClick={goBack} disabled={currentIndex <= 0}>⬅️ Précédent</button>
+                        <button onClick={goForward} disabled={currentIndex >= history.length - 1}>➡️ Suivant</button>
+                    </div>
                     <div
                         className="wiki-content"
                         dangerouslySetInnerHTML={{ __html: content }}
-                        onClick={(e) => {
-                            const target = e.target as HTMLAnchorElement;
-                            if (target.tagName === "A") {
-                                e.preventDefault();
-                                const newPage = target.innerText;
-                                setCurrentPage(newPage);
-                            }
-                        }}
+                        onClick={handleLinkClick}
                     ></div>
                 </div>
             </div>
             <div className="right-panel">
-                {/* Cadre pour le nombre de pages objectifs réussies */}
                 <div className="objective-frame">
                     <h2>Objectifs réussis</h2>
                     <div className="objective-box">
@@ -111,21 +120,22 @@ function SoloGame() {
                     </div>
                 </div>
 
-                {/* Cadre pour les articles parcourus */}
                 <div className="history-frame">
                     <h2>Articles parcourus</h2>
                     <div className="history-box">
                         {history.map((article, index) => (
-                            <p key={index}>{article}</p>
+                            <p key={index}>
+                                <a href={`https://fr.wikipedia.org/wiki/${encodeURIComponent(article)}`} target="_blank" rel="noopener noreferrer">
+                                    {article}
+                                </a>
+                            </p>
                         ))}
                     </div>
                 </div>
 
-                {/* Cadre pour les artéfacts */}
                 <div className="artifacts-frame">
                     <h2>Artéfacts</h2>
-                    <div className="artifacts-box">
-                    </div>
+                    <div className="artifacts-box"></div>
                 </div>
             </div>
         </div>
