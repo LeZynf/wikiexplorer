@@ -99,7 +99,7 @@ function SoloGame() {
             <div className="left-panel">
                 <div className="wiki-frame">
                     <h1>WikiExplorer</h1>
-                    <h2>Objectif : {targetPage}</h2>
+                    <h2 className="blanc">Objectif : {targetPage}</h2>
                     <div className="navigation-buttons">
                         <button onClick={goBack} disabled={currentIndex <= 0}>⬅️ Précédent</button>
                         <button onClick={goForward} disabled={currentIndex >= history.length - 1}>➡️ Suivant</button>
@@ -113,7 +113,7 @@ function SoloGame() {
             </div>
             <div className="right-panel">
                 <div className="objective-frame">
-                    <h2>Objectifs réussis</h2>
+                    <h2  className="blanc">Objectifs réussis</h2>
                     <div className="objective-box">
                         <p>{objectivesCompleted} objectifs atteints</p>
                         <p>{sitesToVisit} sites restants</p>
@@ -121,7 +121,7 @@ function SoloGame() {
                 </div>
 
                 <div className="history-frame">
-                    <h2>Articles parcourus</h2>
+                    <h2  className="blanc">Articles parcourus</h2>
                     <div className="history-box">
                         {history.map((article, index) => (
                             <p key={index}>
@@ -134,7 +134,7 @@ function SoloGame() {
                 </div>
 
                 <div className="artifacts-frame">
-                    <h2>Artéfacts</h2>
+                    <h2  className="blanc" >Artéfacts</h2>
                     <div className="artifacts-box"></div>
                 </div>
             </div>
