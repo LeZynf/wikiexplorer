@@ -2,7 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom'; // Added useNavigate for navigation
 import './accueil.css';
 import './lobby.css';
-import { div } from 'framer-motion/client';
+import staliteArt from '../assets/satellite_art.svg';
+import fuseeArt from '../assets/fusée_art.svg';
+import teleportArt from '../assets/teleport_art.svg';
+import meteoriteArt from '../assets/meteorite_art.svg';
+import baseLunaireArt from '../assets/base-lunaire_art.svg';
+import laserArt from '../assets/laser_art.svg';
+import ovniArt from '../assets/ovni_art.svg';
+import alienArt from '../assets/alien_art.svg';
+
 
 
 interface LobbyProps {
@@ -29,6 +37,7 @@ const Lobby: React.FC<LobbyProps> = ({ partyCode: propPartyCode, playerName: pro
   const [host, setHost] = useState<string>('');  // Hôte (créateur de la party)
   const [isHost, setIsHost] = useState<boolean>(false); // New state to track if current player is host
   const [settingsChanged, setSettingsChanged] = useState<boolean>(false); // Track if settings were changed
+  const [showSettings, setShowSettings] = useState<boolean>(false); // State to show/hide settings popup
   
   // Fonction pour récupérer les détails de la party
   const fetchPartyDetails = async () => {
@@ -186,87 +195,128 @@ const Lobby: React.FC<LobbyProps> = ({ partyCode: propPartyCode, playerName: pro
   };
   
   return (
-    <div className="bg">
-    <div className="lobbygrid">
+<div className="bg">
+<div className="lobbygrid">
     <div className='titlelob'>
         <h1 className="GameName">WikiExplorer</h1>
     </div>
   
   <div className='codelob'>
-    <h2><strong>Code de la Party:</strong> {partyCode}</h2>
-   
+    <h2><strong>Code:</strong> {partyCode}</h2>
   </div>
+
 <div className='hostlob'>
    <h2><strong>Créateur:</strong> {host}</h2>
 </div>
   
-      <div className='paramlob border'>
-      <h2>Paramètres du jeu</h2>
-      <div>
-        <label>Difficiulté :</label>
-        <select
-          value={settings.difficulty}
-          onChange={(e) => handleSettingChange('difficulty', e.target.value)}
-          disabled={!isHost} // Disable for non-hosts
-        >
-          <option value="easy">Facile</option>
-          <option value="normal">Normal</option>
-          <option value="hard">Difficile</option>
-        </select>
-      </div>
-  
-      <div>
-        <label>Temps limite (en secondes) :</label>
-        <input
-          type="number"
-          value={settings.timeLimit}
-          onChange={(e) => handleSettingChange('timeLimit', parseInt(e.target.value))}
-          min="30"
-          disabled={!isHost} // Disable for non-hosts
-        />
-      </div>
-  
-      <div>
-        <label>Nombre de sites à visiter :</label>
-        <input
-          type="number"
-          value={settings.sitesToVisit}
-          onChange={(e) => handleSettingChange('sitesToVisit', parseInt(e.target.value))}
-          min="1"
-          disabled={!isHost} // Disable for non-hosts
-        />
-      </div>
+<div className='artefactlob border-b'>
+  <div>
+    <img src={staliteArt} alt="stalite" />
+    <h3>Satellite</h3>
+  </div>
+  <div>
+    <img src={fuseeArt} alt="fusée" />
+    <h3>Fusée</h3>
+  </div>
+  <div>
+    <img src={teleportArt} alt="teleport" />
+    <h3>Téléporteur</h3>
+  </div>
+  <div>
+    <img src={meteoriteArt} alt="meteorite" />
+    <h3>Météorite</h3>
+  </div>
+  <div>
+    <img src={baseLunaireArt} alt="base lunaire" />
+    <h3>Base Lunaire</h3>
+  </div>
+  <div>
+    <img src={laserArt} alt="laser" />
+    <h3>Laser</h3>
+  </div>
+  <div>
+    <img src={ovniArt} alt="ovni" />
+    <h3>Ovni</h3>
+  </div>
+  <div>
+    <img src={alienArt} alt="alien" />
+    <h3>Alien</h3>
 </div>
-<div className='artefactlob border'>
-  <div>1</div>
-  <div>1</div>
-  <div>1</div>
-  <div>1</div>
-  <div>1</div>
-  <div>1</div>
-  <div>1</div>
-  <div>1</div>
 </div>
-<div className='playerlob border'>
-      <h2>Joueurs dans la party :</h2>
+
+<div className='playerlob border-b'>
+      <h2>Joueurs :</h2>
       
         {players.map((player, index) => (
           <div className='playerbubble' key={index}>{player}</div>
         ))}
       
 </div>
-<div className='chatlob border'>  <div className='chat'><p>bonjour </p><p>bonjour </p><p>bonjour </p></div>
+
+<div className='chatlob border-b'>  <div className='chat'><p>bonjour </p><p>bonjour </p><p>bonjour </p></div>
 <input type="text" />
 </div>
+
 <div className='bouttonback'><button onClick={handleLeaveParty}>BACK</button></div>
+
       {/* Si l'utilisateur est l'hôte, afficher un bouton pour démarrer la partie */}
       {host && host === players[0] && (  // Vérifie si l'hôte est bien dans la liste des joueurs
        <div className='buttonplay'> <button onClick={handleStartGame}>Démarrer la partie</button> </div>
       )}
+      <div className='parambutton'>
+        <button onClick={() => setShowSettings(true)}>Paramètres</button>
+      </div>
+     
+
+      {showSettings && (
+        <div className="popup-overlay">
+          <div className="popup-content">
+            <h2>Paramètres du jeu</h2>
+            <div>
+              <label>Difficiulté :</label>
+              <select
+                value={settings.difficulty}
+                onChange={(e) => handleSettingChange('difficulty', e.target.value)}
+                disabled={!isHost} // Disable for non-hosts
+              >
+                <option value="easy">Facile</option>
+                <option value="normal">Normal</option>
+                <option value="hard">Difficile</option>
+              </select>
+            </div>
+        
+            <div>
+              <label>Temps limite (en secondes) :</label>
+              <input
+                type="number"
+                value={settings.timeLimit}
+                onChange={(e) => handleSettingChange('timeLimit', parseInt(e.target.value))}
+                min="30"
+                disabled={!isHost} // Disable for non-hosts
+              />
+            </div>
+        
+            <div>
+              <label>Nombre de sites à visiter :</label>
+              <input
+                type="number"
+                value={settings.sitesToVisit}
+                onChange={(e) => handleSettingChange('sitesToVisit', parseInt(e.target.value))}
+                min="1"
+                disabled={!isHost} // Disable for non-hosts
+              />
+            </div>
+            <div className="popup-buttons">
+              <button onClick={() => setShowSettings(false)}>Back</button>
+              <button onClick={() => { setShowSettings(false); updatePartySettings(); }}>Confirmer</button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div> 
-    
-    
     </div>
+
   );
 };
 

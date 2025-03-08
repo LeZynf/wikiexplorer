@@ -23,7 +23,7 @@ function SoloGame() {
 
     const initGame = async () => {
         const startPage = await fetchRandomPage();
-        const newTargetPage = await fetchRandomPage();
+        const newTargetPage =  "Gustave_Eiffel"; //await fetchRandomPage();
         if (startPage && newTargetPage) {
             setCurrentPage(startPage);
             setTargetPage(newTargetPage);
