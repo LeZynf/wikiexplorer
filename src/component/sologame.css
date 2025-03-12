@@ -73,3 +73,21 @@
 .wiki-content {
     overflow-x: hidden;
 }
+
+
+
+.wiki-frame h1 {
+    text-shadow: 0px 4px 4px rgba(59, 59, 59, 0.25);
+    -webkit-text-stroke-width: 0.5px;
+    -webkit-text-stroke-color: #ffffff;
+    font-family: Iceberg;
+    font-size: 64px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    background: linear-gradient(130deg, #241ECB 33.36%, #ffffff 70.06%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+}

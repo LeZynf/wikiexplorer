@@ -123,18 +123,14 @@ function WikiGame() {
         }
     }, [currentPage, targetPage, objectivesCompleted, sitesToVisit]);
 
-    // Gérer le clic sur un joueur
     const handlePlayerClick = (playerName: string) => {
         // Récupérer les articles visités par le joueur (en utilisant l'historique)
-        const visitedArticles = history; // Utilisez l'historique complet ou filtrez selon le joueur si nécessaire
-
-        // Mettre à jour l'état avec les informations du joueur
+        const visitedArticles = history;
         setSelectedPlayer({
             name: playerName,
             visitedArticles: visitedArticles,
         });
 
-        // Afficher le pop-up
         setShowPopup(true);
     };
 

@@ -79,12 +79,6 @@ function SoloGame() {
         }
     };
 
-    const goForward = () => {
-        if (currentIndex < history.length - 1) {
-            setCurrentIndex(currentIndex + 1);
-            setCurrentPage(history[currentIndex + 1]);
-        }
-    };
 
     const handleObjectiveCompletion = () => {
         if (currentPage === targetPage) {
@@ -102,7 +96,6 @@ function SoloGame() {
                     <h2 className="blanc">Objectif : {targetPage}</h2>
                     <div className="navigation-buttons">
                         <button onClick={goBack} disabled={currentIndex <= 0}>⬅️ Précédent</button>
-                        <button onClick={goForward} disabled={currentIndex >= history.length - 1}>➡️ Suivant</button>
                     </div>
                     <div
                         className="wiki-content"
