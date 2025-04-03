@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom'; // Added useNavigate for navigation
+import io from 'socket.io-client';
+import ChatMessage from './chat/ChatMessage';
 import './accueil.css';
 import './lobby.css';
 import staliteArt from '../assets/satellite_art.svg';
@@ -11,7 +13,7 @@ import laserArt from '../assets/laser_art.svg';
 import ovniArt from '../assets/ovni_art.svg';
 import alienArt from '../assets/alien_art.svg';
 
-
+const socket = io('http://localhost:5000'); // Connect to the WebSocket server
 
 interface LobbyProps {
   // Le partyCode peut être passé en prop ou récupéré depuis l'URL
@@ -38,6 +40,8 @@ const Lobby: React.FC<LobbyProps> = ({ partyCode: propPartyCode, playerName: pro
   const [isHost, setIsHost] = useState<boolean>(false); // New state to track if current player is host
   const [settingsChanged, setSettingsChanged] = useState<boolean>(false); // Track if settings were changed
   const [showSettings, setShowSettings] = useState<boolean>(false); // State to show/hide settings popup
+  const [chatMessages, setChatMessages] = useState<{ playerName: string; message: string; timestamp: string }[]>([]);
+  
   
   // Fonction pour récupérer les détails de la party
   const fetchPartyDetails = async () => {
@@ -137,7 +141,11 @@ const Lobby: React.FC<LobbyProps> = ({ partyCode: propPartyCode, playerName: pro
   // Fonction pour démarrer la partie (logique à compléter)
   const handleStartGame = () => {
     console.log('La partie commence avec les paramètres :', settings);
-    // Logique pour démarrer la partie, envoyer un signal au backend pour débuter le jeu
+  
+    // Émettre un événement pour informer tous les joueurs que la partie commence
+    socket.emit('startGame', { partyCode });
+  
+    // Rediriger l'hôte vers la page de jeu
     if (partyCode) {
       navigate(`/wikigame/${partyCode}`);
     } else {
@@ -186,12 +194,45 @@ const Lobby: React.FC<LobbyProps> = ({ partyCode: propPartyCode, playerName: pro
   };
   
   // Function to toggle artifact status
-  const toggleArtifact = (index: number) => {
-    if (!isHost) return; // Only host can toggle artifacts
+  //const toggleArtifact = (index: number) => {
+    //if (!isHost) return; // Only host can toggle artifacts
     
     // Here you would implement the logic to toggle artifacts
-    console.log(`Toggling artifact ${index}`);
+    //console.log(`Toggling artifact ${index}`);
     // This would be expanded when you implement the artifacts feature
+  //};
+
+  useEffect(() => {
+    // Listen for incoming chat messages
+    socket.on('receiveMessage', (message: { playerName: string; message: string; timestamp: string }) => {
+      setChatMessages((prevMessages) => [...prevMessages, message]);
+    });
+
+    return () => {
+      socket.off('receiveMessage');
+    };
+  }, []);
+
+  useEffect(() => {
+    // Écouter l'événement "startGame" pour rediriger les joueurs
+    socket.on('startGame', ({ partyCode }: { partyCode: string }) => {
+      console.log('La partie commence pour tous les joueurs.');
+      navigate(`/wikigame/${partyCode}`);
+    });
+
+    return () => {
+      socket.off('startGame');
+    };
+  }, [navigate]);
+
+  const handleSendMessage = (message: string) => {
+    const chatMessage = {
+      playerName: localStorage.getItem('playerName') || 'Anonymous',
+      message,
+      timestamp: new Date().toISOString(),
+    };
+  
+    socket.emit('sendMessage', chatMessage); // Envoyer le message au serveur
   };
   
   return (
@@ -253,16 +294,52 @@ const Lobby: React.FC<LobbyProps> = ({ partyCode: propPartyCode, playerName: pro
       
 </div>
 
-<div className='chatlob border-b'>  <div className='chat'><p>bonjour </p><p>bonjour </p><p>bonjour </p></div>
-<input type="text" />
+<div className="chatlob border-b">
+  <div className="chat">
+    {chatMessages.map((msg, index) => (
+      <ChatMessage key={index} username={msg.playerName} message={msg.message} timestamp={msg.timestamp} />
+    ))}
+  </div>
+  <div className="chat-input-container">
+    <input
+      type="text"
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          const input = e.target as HTMLInputElement;
+          const message = input.value.trim();
+          if (message !== '') {
+            handleSendMessage(message);
+            input.value = '';
+          }
+        }
+      }}
+      placeholder="Type your message..."
+      className="chat-input"
+    />
+    <button
+      onClick={() => {
+        const input = document.querySelector('.chat-input') as HTMLInputElement;
+        const message = input.value.trim();
+        if (message !== '') {
+          handleSendMessage(message);
+          input.value = '';
+        }
+      }}
+      className="chat-send-button"
+    >
+      Send
+    </button>
+  </div>
 </div>
 
 <div className='bouttonback'><button onClick={handleLeaveParty}>BACK</button></div>
 
       {/* Si l'utilisateur est l'hôte, afficher un bouton pour démarrer la partie */}
-      {host && host === players[0] && (  // Vérifie si l'hôte est bien dans la liste des joueurs
-       <div className='buttonplay'> <button onClick={handleStartGame}>Démarrer la partie</button> </div>
-      )}
+      {host && currentPlayerName === host && (
+  <div className='buttonplay'>
+    <button onClick={handleStartGame}>Démarrer la partie</button>
+  </div>
+)}
       <div className='parambutton'>
         <button onClick={() => setShowSettings(true)}>Paramètres</button>
       </div>

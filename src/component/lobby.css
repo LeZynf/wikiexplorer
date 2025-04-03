@@ -72,20 +72,27 @@
     }
 
     .chatlob { 
+    
         grid-area: 12 / 2 / 19 / 5; 
         text-align: left;
-        overflow-y: auto;
-        word-wrap: break-word;
+       
+      
         font-size: 1rem;
         padding-left: 10px;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        justify-content: flex-end;
         padding-top: 10px;
         align-items: center;
+        overflow: hidden;
     }
     .chat {
+        display: flex;
+        flex-direction: column;
+        word-wrap: break-word;
       width: 100%;
+      min-height: 90%;
+      height: 90%;
       overflow-y: auto;
     }
 
@@ -101,7 +108,7 @@
         margin-bottom: 10px;
     }
     .chatlob input{
-        width: 90%;
+        width: 80%;
         height: 10%;
         background: rgba(0, 0, 0, 0.20);
         border-radius: 20px;
@@ -109,7 +116,7 @@
         padding: 10px;
         font-family: 'Instrument Serif', serif;
         font-size: 1.5rem;
-        color: black;
+        color: rgb(255, 255, 255);
         margin-bottom: 10px;
     }
 
@@ -307,4 +314,30 @@ width: 70%;
         background-clip: text;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+    }
+    .chat-input-container {
+      
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 10%;
+    }
+    .chat-send-button
+    {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 20px;
+        border: 2px solid #ffffff !important;
+    width: 20%;
+       height: 100%;
+        color: rgb(255, 255, 255) !important;
+        font-size: 1rem;
+
+        margin-bottom: 10px;
+        padding: 0 0;
+        font-family: 'Instrument Serif', serif;
+        font-style: italic;
+        -webkit-text-stroke-width: 1px;
+        -webkit-text-stroke-color: #ffffff;
     }

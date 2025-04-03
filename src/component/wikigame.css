@@ -3,7 +3,7 @@ body {
     background: url('../assets/bg.svg') no-repeat center center fixed;
     background-size: cover;
     font-family: 'Arial', sans-serif;
-    color: #fff;
+    color: white;
     margin: 0;
     padding: 0;
 }
@@ -13,13 +13,17 @@ body {
     height: 100vh;
     padding: 20px;
     gap: 20px;
+    overflow: hidden;
 }
 
 .left-panel {
     display: flex;
     flex-direction: column;
     flex: 2;
+    min-width: 66%;
+    max-width: 66%;
     gap: 20px;
+    
 }
 
 .right-panel {
@@ -30,10 +34,11 @@ body {
 }
 
 .wiki-frame {
+    color: #7542c8;
     background: rgba(0, 0, 0, 0.8);
     border-radius: 10px;
     padding: 20px;
-    flex: 1;
+    height: 80%;
 }
 
 .wiki-frame h1 {
@@ -41,29 +46,32 @@ body {
     -webkit-text-stroke-width: 2px;
     -webkit-text-stroke-color: #000;
     font-family: Iceberg;
-    font-size: 128px;
+    font-size: 64px;
     font-style: normal;
-    font-weight: 400;
+    font-weight: 200;
     line-height: normal;
     background: linear-gradient(130deg, #241ECB 33.36%, #000 70.06%);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin: 0;
+    padding: 0;
 }
 
 .wiki-frame h2 {
     font-size: 24px;
-    margin: 10px 0;
+    margin: 2px 0;
 }
 
 .wiki-content {
-    height: 60vh;
+    height: 60%;
     overflow-y: auto;
     padding: 10px;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 5px;
 }
+
+
 
 .wiki-content a {
     color: #ffcc00;
@@ -191,4 +199,16 @@ body {
     color: black;
     font-weight: bold;
     font-size: 14px; /* Réduire la taille de la police */
+}
+
+
+.bandeau-container ,.bandeau-niveau-ebauche, .bandeau-niveau-information, 
+.bandeau-niveau-detail, .bandeau-section, .bandeau-niveau-information, .homonymie, .autres-projets, .boite-grise {
+
+    background: none;
+    background-color: none;
+}
+
+tbody  {
+border: 2px solid white;
 }
