@@ -1,0 +1,392 @@
+/* Styles généraux */
+body {
+    background: url('../assets/bg.svg') no-repeat center center fixed;
+    background-size: cover;
+    font-family: 'Arial', sans-serif;
+    color: white;
+    margin: 0;
+    padding: 0;
+}
+
+.wiki-game {
+    display: flex;
+    height: 100vh;
+    padding: 20px;
+    gap: 20px;
+    overflow: hidden;
+}
+
+.left-panel {
+    display: flex;
+    flex-direction: column;
+    flex: 2;
+    min-width: 66%;
+    max-width: 66%;
+    gap: 20px;
+    
+}
+
+.right-panel {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 20px;
+}
+
+.wiki-frame {
+    color: #7542c8;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+    padding: 20px;
+    height: 80%;
+}
+
+.wiki-frame h1 {
+    text-shadow: 0px 4px 4px rgba(59, 59, 59, 0.25);
+    -webkit-text-stroke-width: 2px;
+    -webkit-text-stroke-color: #000;
+    font-family: Iceberg;
+    font-size: 64px;
+    font-style: normal;
+    font-weight: 200;
+    line-height: normal;
+    background: linear-gradient(130deg, #241ECB 33.36%, #000 70.06%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+    padding: 0;
+}
+
+.wiki-frame h2 {
+    font-size: 24px;
+    margin: 2px 0;
+}
+
+.wiki-content {
+    height: 60%;
+    overflow-y: auto;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+}
+
+.wiki-content a {
+    color: #ffcc00;
+    text-decoration: none;
+}
+
+.wiki-content a:hover {
+    text-decoration: underline;
+}
+
+.code-frame {
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.code-frame h2 {
+    font-size: 24px;
+    margin: 0 0 10px 0;
+}
+
+.code-box {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    padding: 10px;
+    text-align: center;
+}
+
+.player-frame {
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+    padding: 15px;
+    flex: 1;
+}
+
+.player-frame h2 {
+    font-size: 24px;
+    margin: 0 0 10px 0;
+}
+
+.chat-frame {
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+    padding: 15px;
+    flex: 1;
+}
+
+.chat-frame h2 {
+    font-size: 24px;
+    margin: 0 0 10px 0;
+}
+
+.chat-box {
+    height: 150px;
+    overflow-y: auto;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.artifacts-bar {
+    background: rgba(50, 50, 50, 0.8);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+}
+
+.artifacts-bar h2 {
+    font-size: 24px;
+    margin: 0 0 10px 0;
+    color: #fff; /* Texte en blanc */
+}
+
+.artifact-bar {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.popup-content button {
+    margin-top: 20px;
+    padding: 5px 10px; /* Réduire la taille du padding */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    color: black;
+    font-weight: bold;
+    font-size: 14px; /* Réduire la taille de la police */
+}
+
+.bandeau-container ,.bandeau-niveau-ebauche, .bandeau-niveau-information, 
+.bandeau-niveau-detail, .bandeau-section, .bandeau-niveau-information, .homonymie, .autres-projets, .boite-grise {
+
+    background: none;
+    background-color: none;
+}
+
+tbody  {
+border: 2px solid white;
+}
+
+.objectives-preview {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.objectives-list {
+    margin: 2rem 0;
+}
+
+.objective-item {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    margin: 2px;
+}
+
+.objective-item.completed {
+    background-color: rgba(76, 175, 80, 0.2);
+    color: #2e7d32;
+}
+
+.objective-item.not-completed {
+    background-color: rgba(244, 67, 54, 0.2);
+    color: #c62828;
+}
+
+.objective-icon {
+    margin-right: 1rem;
+}
+
+.objective-text {
+    font-weight: 500;
+}
+
+.loading-state {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    text-align: center;
+}
+
+.loading-indicator {
+    max-width: 600px;
+    padding: 2rem;
+}
+
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 4px solid #ffcc00;
+    width: 50px;
+    height: 50px;
+    margin: 20px auto;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Styles pour l'état d'erreur */
+.error-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    padding: 2rem;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #ffcc00;
+    text-align: center;
+}
+
+.error-state h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.error-message {
+    color: #ff4444;
+    margin: 1rem 0;
+    padding: 0.5rem;
+    background-color: rgba(255, 68, 68, 0.1);
+    border-radius: 4px;
+    max-width: 80%;
+}
+
+.error-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.retry-button, .alternate-button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+.retry-button {
+    background-color: #ffcc00;
+    color: #000;
+}
+
+.alternate-button {
+    background-color: #4185f4;
+    color: white;
+}
+
+.retry-button:hover, .alternate-button:hover {
+    transform: scale(1.05);
+}
+
+/* Style pour les joueurs */
+.player-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border-radius: 4px;
+}
+
+.player-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.objective-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background-color: #ffcc00;
+    color: black;
+    border-radius: 50%;
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+.player-name {
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+.current-article {
+    font-size: 0.8rem;
+    color: #999;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 150px;
+}
+
+.objectives-status {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin: 10px 0;
+    max-height: 150px;
+    overflow-y: auto;
+    padding: 5px;
+    background-color: rgba(0,0,0,0.05);
+    border-radius: 5px;
+}
+
+
+.players-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Espacement entre les joueurs */
+}
+
+.player {
+    background: rgba(100, 100, 255, 0.5);
+    border-radius: 5px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.player-info {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Espacement entre le nombre et le pseudo */
+}
+
+.objective-count {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ffcc00; /* Couleur jaune pour le nombre */
+}
+
+.player-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff; /* Texte en blanc */
+}
+
+.current-article {
+    font-size: 14px;
+    color: #ccc; /* Texte en gris clair */
+    margin-top: 5px; /* Espacement entre le pseudo et l'article */
+}

@@ -11,6 +11,15 @@ const partySchema = new mongoose.Schema({
     timeLimit: { type: Number, default: 300 },  // Temps en secondes
     sitesToVisit: { type: Number, default: 2 }
   },
+  objectives: { 
+    type: [String],  
+    default: function() { return []; }  // Utiliser une fonction pour le default
+  },
+  completedArticles: {
+    type: Object,
+    default: function() { return {}; }  // Utiliser une fonction pour le default
+  },
+  startTime: { type: Date, default: null },
   createdAt: { type: Date, default: Date.now }
 });
 

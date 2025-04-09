@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom'; // Added useNavigate for navigation
-import io from 'socket.io-client';
 import ChatMessage from './chat/ChatMessage';
 import './accueil.css';
 import './lobby.css';
@@ -12,8 +11,7 @@ import baseLunaireArt from '../assets/base-lunaire_art.svg';
 import laserArt from '../assets/laser_art.svg';
 import ovniArt from '../assets/ovni_art.svg';
 import alienArt from '../assets/alien_art.svg';
-
-const socket = io('http://localhost:5000'); // Connect to the WebSocket server
+import socket from '../services/socket'; // Importer le socket partagé au lieu d'en créer un nouveau
 
 interface LobbyProps {
   // Le partyCode peut être passé en prop ou récupéré depuis l'URL
@@ -33,8 +31,8 @@ const Lobby: React.FC<LobbyProps> = ({ partyCode: propPartyCode, playerName: pro
   const [currentPlayerName, setCurrentPlayerName] = useState<string>(propPlayerName || ''); // Nom du joueur actuel
   const [settings, setSettings] = useState({
     difficulty: 'normal',   // Difficulté par défaut
-    timeLimit: 60,          // Temps limite par défaut
-    sitesToVisit: 5,        // Nombre de sites à visiter pour gagner
+    timeLimit: 300,          // Temps limite par défaut
+    sitesToVisit: 2,        // Nombre de sites à visiter pour gagner
   });
   const [host, setHost] = useState<string>('');  // Hôte (créateur de la party)
   const [isHost, setIsHost] = useState<boolean>(false); // New state to track if current player is host
@@ -45,7 +43,7 @@ const Lobby: React.FC<LobbyProps> = ({ partyCode: propPartyCode, playerName: pro
   
   // Fonction pour récupérer les détails de la party
   const fetchPartyDetails = async () => {
-    if (!partyCode) return;  // Si le partyCode n'est pas défini, ne pas exécuter la requête
+    if (!partyCode) return;
     
     try {
       console.log('Fetching party details for code:', partyCode);
@@ -54,8 +52,11 @@ const Lobby: React.FC<LobbyProps> = ({ partyCode: propPartyCode, playerName: pro
   
       if (data.success) {
         setPlayers(data.party.players);
-        setHost(data.party.creator);  // Récupérer l'hôte (créateur de la party)
-        setSettings(data.party.settings);  // Récupérer les paramètres de la partie
+        setHost(data.party.creator);
+        // Mettre à jour les paramètres avec ceux de la base de données
+        if (data.party.settings) {
+          setSettings(data.party.settings);
+        }
       }
     } catch (error) {
       console.error('Error fetching party details:', error);
@@ -97,21 +98,22 @@ const Lobby: React.FC<LobbyProps> = ({ partyCode: propPartyCode, playerName: pro
   
   // Fonction pour gérer les changements dans les paramètres
   const handleSettingChange = (setting: string, value: any) => {
-    // Only allow host to change settings
     if (!isHost) return;
     
-    setSettings((prevSettings) => ({
-      ...prevSettings,
+    const newSettings = {
+      ...settings,
       [setting]: value,
-    }));
+    };
+    
+    setSettings(newSettings);
     setSettingsChanged(true);
     
-    // Send updated settings to server
-    updatePartySettings();
+    // Call updatePartySettings immediately when a setting changes
+    updatePartySettings(newSettings);
   };
   
   // Function to update party settings on the server
-  const updatePartySettings = async () => {
+  const updatePartySettings = async (newSettings: typeof settings) => {
     if (!isHost || !partyCode) return;
     
     try {
@@ -120,21 +122,21 @@ const Lobby: React.FC<LobbyProps> = ({ partyCode: propPartyCode, playerName: pro
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           partyCode,
-          settings,
+          settings: newSettings,
           hostName: currentPlayerName
         }),
       });
       
       const data = await response.json();
-      if (data.success) {
-        console.log('Settings updated successfully');
-        // Reset the changed flag after successful update
-        setTimeout(() => setSettingsChanged(false), 1000);
-      } else {
+      if (!data.success) {
         console.error('Failed to update settings:', data.message);
+        // Restore previous settings if update failed
+        setSettings(settings);
       }
     } catch (error) {
       console.error('Error updating settings:', error);
+      // Restore previous settings if update failed
+      setSettings(settings);
     }
   };
   
@@ -224,6 +226,17 @@ const Lobby: React.FC<LobbyProps> = ({ partyCode: propPartyCode, playerName: pro
       socket.off('startGame');
     };
   }, [navigate]);
+
+  useEffect(() => {
+    // Écouter les mises à jour des paramètres
+    socket.on('settingsUpdated', (updatedSettings: { difficulty: string; timeLimit: number; sitesToVisit: number }) => {
+      setSettings(updatedSettings);
+    });
+
+    return () => {
+      socket.off('settingsUpdated');
+    };
+  }, []);
 
   const handleSendMessage = (message: string) => {
     const chatMessage = {
@@ -385,7 +398,7 @@ const Lobby: React.FC<LobbyProps> = ({ partyCode: propPartyCode, playerName: pro
             </div>
             <div className="popup-buttons">
               <button onClick={() => setShowSettings(false)}>Back</button>
-              <button onClick={() => { setShowSettings(false); updatePartySettings(); }}>Confirmer</button>
+              <button onClick={() => { setShowSettings(false); updatePartySettings(settings); }}>Confirmer</button>
             </div>
           </div>
         </div>

@@ -1,11 +1,11 @@
 
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
-import Accueil from './component/accueil';
-import JoinParty from './component/joinparty';
-import Lobby from './component/lobby';
-import WikiGame from './component/wikigame';
+import Accueil from './components/accueil.tsx';
+import JoinParty from './components/joinparty.tsx';
+import Lobby from './components/lobby.tsx';
+import WikiGame from './components/wikigame.tsx';
 import { useParams as useReactRouterParams } from 'react-router-dom';
-import SoloGame from "./component/sologame.tsx";
+import SoloGame from "./components/sologame.tsx";
 
 // Wrapper component to pass location state to Lobby
 function LobbyWrapper() {
@@ -17,9 +17,7 @@ function LobbyWrapper() {
 }
 
 function App() {
-  function useParams() {
-    return useReactRouterParams();
-  }
+
   return (
     <Router>
       <Routes>

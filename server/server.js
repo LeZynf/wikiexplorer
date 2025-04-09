@@ -49,6 +49,121 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
   });
+
+  // Initialisation de la partie
+  socket.on('initializeGame', async ({ partyCode }) => {
+    try {
+      // Vérifier d'abord si la partie existe
+      const existingParty = await Party.findOne({ code: partyCode });
+      if (!existingParty) {
+        console.log(`Partie ${partyCode} non trouvée`);
+        return;
+      }
+      
+      // Si les objectifs existent déjà, mettre à jour uniquement le statut et l'heure de début
+      if (existingParty.objectives && existingParty.objectives.length > 0) {
+        const updatedParty = await Party.findOneAndUpdate(
+          { code: partyCode },
+          { 
+            status: 'en cours',
+            startTime: new Date()
+          },
+          { new: true }
+        );
+        
+        console.log(`Partie ${partyCode} initialisée avec objectifs existants`);
+        
+        // Émettre les objectifs à tous les joueurs
+        io.to(partyCode).emit('objectivesGenerated', { objectives: updatedParty.objectives });
+      } else {
+        // Générer de nouveaux objectifs
+        const objectives = [];
+        const numObjectives = existingParty.settings.sitesToVisit;
+        
+        console.log(`Génération de ${numObjectives} objectifs pour la partie ${partyCode}`);
+        
+        for (let i = 0; i < numObjectives; i++) {
+          try {
+            const response = await fetch("https://fr.wikipedia.org/api/rest_v1/page/random/title");
+            const data = await response.json();
+            objectives.push(data.items[0].title);
+          } catch (fetchError) {
+            console.error("Erreur lors de la récupération d'un titre aléatoire:", fetchError);
+            // Utiliser un titre par défaut en cas d'échec
+            objectives.push(`Article ${i + 1}`);
+          }
+        }
+        
+        // Mettre à jour en une seule opération atomique
+        const updatedParty = await Party.findOneAndUpdate(
+          { code: partyCode },
+          { 
+            status: 'en cours',
+            startTime: new Date(),
+            objectives: objectives
+          },
+          { new: true }
+        );
+        
+        console.log(`Objectifs générés pour la partie ${partyCode}:`, objectives);
+        
+        // Émettre les objectifs à tous les joueurs
+        io.to(partyCode).emit('objectivesGenerated', { objectives: objectives });
+      }
+      
+      // Rejoindre la room
+      socket.join(partyCode);
+    } catch (error) {
+      console.error('Error initializing game:', error);
+    }
+  });
+
+  // Gestion de la complétion d'un objectif
+  socket.on('objectiveCompleted', async ({ partyCode, playerName, article }) => {
+    try {
+      console.log(`Joueur ${playerName} a complété l'article: ${article}`);
+      
+      const party = await Party.findOne({ code: partyCode });
+      if (!party) {
+        console.error(`Partie non trouvée: ${partyCode}`);
+        return;
+      }
+      
+      // Vérification de la structure avant modification
+      console.log("Structure actuelle de completedArticles:", JSON.stringify(party.completedArticles));
+      
+      // S'assurer que completedArticles est un objet
+      if (!party.completedArticles) {
+        party.completedArticles = {};
+      }
+      
+      // S'assurer que le joueur a une entrée
+      if (!party.completedArticles[playerName]) {
+        party.completedArticles[playerName] = [];
+      }
+      
+      // Ajouter l'article s'il n'est pas déjà présent
+      if (!party.completedArticles[playerName].includes(article)) {
+        party.completedArticles[playerName].push(article);
+        
+        // Utiliser markModified pour informer Mongoose de la modification
+        party.markModified('completedArticles');
+        await party.save();
+        
+        console.log(`Article ${article} ajouté pour ${playerName}`);
+        console.log("Nouvelle structure:", JSON.stringify(party.completedArticles));
+        
+        // Émettre l'événement de progression
+        io.to(partyCode).emit('objectiveProgress', {
+          playerName,
+          completedArticles: party.completedArticles[playerName],
+          totalObjectives: party.objectives.length
+        });
+      }
+    } catch (error) {
+      console.error("Erreur lors de la complétion d'objectif:", error);
+    }
+  });
 });
 
 // Fonction pour générer un code unique pour une partie
@@ -78,10 +193,23 @@ app.post('/create-party', async (req, res) => {
       code: partyCode,
       creator,
       players: [creator],
-      settings: settings || {},
+      settings: settings || {
+        difficulty: 'normal',
+        timeLimit: 300,
+        sitesToVisit: 2
+      },
+      status: 'en attente',
+      objectives: [], // Initialiser avec un tableau vide
+      completedArticles: {}, // Initialiser avec un objet vide
+      startTime: null,
+      createdAt: new Date()
     });
 
+    // Cette ligne était manquante ou incomplète!
     await newParty.save();
+    console.log('✅ Partie créée avec succès:', partyCode);
+    
+    // Envoyer la réponse après avoir sauvegardé
     res.json({ success: true, partyCode });
   } catch (error) {
     console.error('❌ Error creating party:', error);
@@ -165,18 +293,82 @@ app.get('/party/:partyCode', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Party not found' });
     }
 
+    // Vérifier la structure de completedArticles avant de l'envoyer
+    if (typeof party.completedArticles !== 'object' || party.completedArticles === null) {
+      party.completedArticles = {};
+      party.markModified('completedArticles');
+      await party.save();
+    }
+
+    // Log pour débogage
+    console.log("Party details:", {
+      code: party.code,
+      completedArticles: party.completedArticles,
+      objectives: party.objectives
+    });
+
     res.json({
       success: true,
       party: {
         code: party.code,
         creator: party.creator,
-        settings: party.settings,
         players: party.players,
-      },
+        settings: party.settings,
+        status: party.status,
+        objectives: party.objectives || [],
+        completedArticles: party.completedArticles || {},
+        startTime: party.startTime
+      }
     });
   } catch (error) {
-    console.error('❌ Error fetching party:', error);
+    console.error('Error fetching party:', error);
     res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+app.post('/update-party-settings', async (req, res) => {
+  const { partyCode, settings, hostName } = req.body;
+
+  try {
+    const party = await Party.findOne({ code: partyCode });
+
+    if (!party) {
+      return res.json({
+        success: false,
+        message: 'Party not found'
+      });
+    }
+
+    if (party.creator !== hostName) {
+      return res.json({
+        success: false,
+        message: 'Only host can update settings'
+      });
+    }
+
+    // Mettre à jour les paramètres
+    party.settings = {
+      ...party.settings,
+      ...settings
+    };
+
+    // Sauvegarder les modifications
+    await party.save();
+
+    // Émettre les nouveaux paramètres à tous les joueurs de la partie
+    io.emit('settingsUpdated', party.settings);
+    
+    res.json({
+      success: true,
+      settings: party.settings
+    });
+
+  } catch (error) {
+    console.error('Error updating settings:', error);
+    res.json({
+      success: false,
+      message: error.message
+    });
   }
 });
 
