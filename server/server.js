@@ -160,8 +160,70 @@ io.on('connection', (socket) => {
           totalObjectives: party.objectives.length
         });
       }
+      
+      // Vérifier si le joueur a terminé tous ses objectifs
+      if (party.completedArticles[playerName].length >= party.objectives.length) {
+        console.log(`🏆 Joueur ${playerName} a terminé tous les objectifs!`);
+        
+        // Marquer la partie comme terminée
+        party.status = 'terminé';
+        party.endTime = new Date();
+        party.winner = playerName;
+        await party.save();
+        
+        // Préparer les statistiques pour le podium
+        const playerStats = [];
+        for (const player of party.players) {
+          const completedArticles = party.completedArticles[player] || [];
+          
+          playerStats.push({
+            name: player,
+            completedObjectives: completedArticles.length,
+            isWinner: player === playerName,
+            visitedPages: completedArticles.length
+          });
+        }
+        
+        // Trier le podium et envoyer l'événement gameOver
+        playerStats.sort((a, b) => {
+          if (b.completedObjectives !== a.completedObjectives) {
+            return b.completedObjectives - a.completedObjectives;
+          }
+          return a.visitedPages - b.visitedPages;
+        });
+        io.to(partyCode).emit('gameOver', { winner: playerName, playerStats });
+      }
     } catch (error) {
       console.error("Erreur lors de la complétion d'objectif:", error);
+    }
+  });
+
+  // Ajouter un nouvel événement pour créer une nouvelle partie avec les mêmes joueurs
+  socket.on('restartGame', async ({ oldPartyCode }) => {
+    try {
+      const oldParty = await Party.findOne({ code: oldPartyCode });
+      if (!oldParty) return;
+      
+      const partyCode = await generateUniquePartyCode();
+      const newParty = new Party({
+        code: partyCode,
+        creator: oldParty.creator,
+        players: [...oldParty.players],
+        settings: oldParty.settings,
+        status: 'en attente',
+        objectives: [],
+        completedArticles: {},
+        startTime: null,
+        createdAt: new Date()
+      });
+      
+      await newParty.save();
+      console.log(`✅ Nouvelle partie créée: ${partyCode}`);
+      
+      // Informer tous les joueurs de la nouvelle partie
+      io.to(oldPartyCode).emit('gameRestarted', { newPartyCode: partyCode });
+    } catch (error) {
+      console.error("Erreur lors du redémarrage de la partie:", error);
     }
   });
 });
@@ -237,7 +299,13 @@ app.post('/join-party', async (req, res) => {
 
     party.players.push(playerName);
     await party.save();
-    res.json({ success: true, message: 'Player added to the party' });
+    const data = { success: true, message: 'Player added to the party' };
+    res.json(data);
+
+    if (data.success) {
+      // Émettre l'événement aux autres joueurs
+      io.to(partyCode).emit('playerJoined', { playerName: req.body.playerName });
+    }
   } catch (error) {
     console.error('❌ Error joining party:', error);
     res.status(500).json({ success: false, message: 'Server error' });
@@ -276,7 +344,12 @@ app.post('/leave-party', async (req, res) => {
       await Party.deleteOne({ code: partyCode });
     }
 
-    res.json({ success: true, message: 'Player left the party successfully' });
+    const data = { success: true, message: 'Player left the party successfully' };
+    res.json(data);
+
+    if (data.success) {
+      io.to(partyCode).emit('playerLeft', { playerName: req.body.playerName });
+    }
   } catch (error) {
     console.error('❌ Error leaving party:', error);
     res.status(500).json({ success: false, message: 'Server error' });
@@ -357,6 +430,7 @@ app.post('/update-party-settings', async (req, res) => {
 
     // Émettre les nouveaux paramètres à tous les joueurs de la partie
     io.emit('settingsUpdated', party.settings);
+    io.to(partyCode).emit('partyUpdated');
     
     res.json({
       success: true,

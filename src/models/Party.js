@@ -20,7 +20,11 @@ const partySchema = new mongoose.Schema({
     default: function() { return {}; }  // Utiliser une fonction pour le default
   },
   startTime: { type: Date, default: null },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  
+  // Nouveaux champs pour la fin de partie
+  winner: { type: String },
+  endTime: { type: Date }
 });
 
 const Party = mongoose.model('Party', partySchema);

@@ -1,10 +1,30 @@
 import { useState, useEffect, useCallback } from "react";
+import { useParams, useNavigate } from "react-router-dom"; // Ajouter useNavigate
 import ChatMessage from './chat/ChatMessage';
 import "./WikiGame.css";
-import { useParams } from "react-router-dom";
 import socket from '../services/socket';
 
+// Ajouter ces types après les imports
+type Artifact = {
+    id: string;
+    name: string;
+    description: string;
+    type: 'positive' | 'negative';
+    effect: () => void;
+    duration?: number;
+    used?: boolean;
+    icon: string;
+};
+
+type PlayerArtifacts = {
+    [playerName: string]: {
+        inventory: Artifact[];
+        activeEffects: Artifact[];
+    };
+};
+
 function WikiGame() {
+    const navigate = useNavigate(); // Initialiser navigate
     const [currentPage, setCurrentPage] = useState("");
     const [remainingObjectives, setRemainingObjectives] = useState<string[]>([]);
     const [history, setHistory] = useState<string[]>([]);
@@ -17,6 +37,12 @@ function WikiGame() {
     const [isLoading, setIsLoading] = useState(true);
     const [initStep, setInitStep] = useState('loading'); // 'loading', 'objectives', 'ready'
 
+    // Ajouter ces états avec les états existants
+    const [artifacts, setArtifacts] = useState<Artifact[]>([]);
+    const [playerArtifacts, setPlayerArtifacts] = useState<PlayerArtifacts>({});
+    const [activeEffects, setActiveEffects] = useState<Artifact[]>([]);
+    const [isSnailActive, setIsSnailActive] = useState(false);
+
     // États pour gérer le pop-up
     const [selectedPlayer, setSelectedPlayer] = useState<{ name: string, visitedArticles: string[] } | null>(null);
     const [showPopup, setShowPopup] = useState(false);
@@ -25,6 +51,16 @@ function WikiGame() {
     
     // Ajouter un état pour gérer les erreurs
     const [error, setError] = useState<string | null>(null);
+
+    // Ajouter un état pour la fin de partie
+    const [gameOver, setGameOver] = useState(false);
+    const [winner, setWinner] = useState('');
+    const [playerStats, setPlayerStats] = useState<{
+        name: string;
+        completedObjectives: number;
+        isWinner: boolean;
+        visitedPages: number;
+    }[]>([]);
 
     // ================ FONCTIONS UTILITAIRES CENTRALISÉES ================
     
@@ -80,7 +116,7 @@ function WikiGame() {
     }, []);
     
     // Fonction améliorée pour charger le contenu Wikipedia
-    const fetchWikiContent = useCallback(async (pageName: string) => {
+    const fetchWikiContent = useCallback(async (pageName: string, skipCheck = false) => {
         try {
             console.log("Chargement du contenu pour:", pageName);
             
@@ -117,8 +153,10 @@ function WikiGame() {
                 return prev;
             });
             
-            // Vérifier si c'est un objectif
-            checkObjectiveCompletion(pageName);
+            // Ne vérifier l'objectif que si skipCheck est false
+            if (!skipCheck) {
+                checkObjectiveCompletion(pageName);
+            }
             
             return true;
         } catch (error) {
@@ -127,7 +165,29 @@ function WikiGame() {
         }
     }, []);
     
-    // Fonction pour vérifier si une page est un objectif
+    // Cette fonction est déjà définie plus haut
+    
+    // Fonction pour acquérir un artefact
+    const acquireArtifact = useCallback((artifact: Artifact) => {
+        const playerName = localStorage.getItem("playerName") || "Anonymous";
+        
+        setPlayerArtifacts(prev => {
+            const playerData = prev[playerName] || { inventory: [], activeEffects: [] };
+            
+            return {
+                ...prev,
+                [playerName]: {
+                    ...playerData,
+                    inventory: [...playerData.inventory, artifact],
+                },
+            };
+        });
+        
+        // Notification
+        alert(`Vous avez obtenu l'artefact: ${artifact.name} (${artifact.description})`);
+    }, []);
+
+    // Modifier la fonction checkObjectiveCompletion pour inclure l'acquisition d'artefacts
     const checkObjectiveCompletion = useCallback((page: string) => {
         if (!page || !objectives.length) return;
         
@@ -147,8 +207,244 @@ function WikiGame() {
             
             // Mettre à jour les objectifs restants
             updateRemainingObjectives(objectives, newCompleted);
+            
+            // Chance d'obtenir un artefact (30% de chance)
+            if (Math.random() < 0.3 && artifacts.length > 0) {
+                // Filtrer uniquement les artefacts positifs
+                const positiveArtifacts = artifacts.filter(a => a.type === 'positive');
+                if (positiveArtifacts.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * positiveArtifacts.length);
+                    const randomArtifact = positiveArtifacts[randomIndex];
+                    acquireArtifact(randomArtifact);
+                }
+            }
         }
-    }, [objectives, playerCompletedObjectives, partyCode, updateRemainingObjectives]);
+    }, [objectives, playerCompletedObjectives, partyCode, updateRemainingObjectives, artifacts, acquireArtifact]);
+
+    // Ajouter cette fonction dans WikiGame
+    const initializeArtifacts = useCallback(() => {
+        const allArtifacts: Artifact[] = [
+            {
+                id: 'satellite',
+                name: 'Satellite',
+                description: 'Montre le chemin le plus court vers les articles cibles',
+                type: 'positive',
+                effect: () => activateGPS(),
+                icon: '🛰️'
+            },
+            {
+                id: 'rocket',
+                name: 'Fusée',
+                description: 'Retourne à l\'article précédent',
+                type: 'positive',
+                effect: () => goBack(),
+                icon: '🚀'
+            },
+            {
+                id: 'teleporter',
+                name: 'Téléporteur',
+                description: 'Se téléporte à 2 liens d\'un article cible',
+                type: 'positive',
+                effect: () => activateTeleporter(),
+                icon: '🌀'
+            },
+            {
+                id: 'meteorite',
+                name: 'Météorite',
+                description: 'Piège un article pour les autres joueurs',
+                type: 'positive',
+                effect: () => placeMine(),
+                icon: '☄️'
+            },
+            {
+                id: 'moonbase',
+                name: 'Base Lunaire',
+                description: 'Bloque le joueur sur une page pendant 1 minute',
+                type: 'negative',
+                effect: () => activateSnail(),
+                duration: 60000,
+                icon: '🏠'
+            },
+            {
+                id: 'laser',
+                name: 'Laser',
+                description: 'Désintègre le dernier objectif atteint',
+                type: 'negative',
+                effect: () => activateEraser(),
+                icon: '🔫'
+            },
+            {
+                id: 'ufo',
+                name: 'Ovni',
+                description: 'Capture et téléporte aléatoirement sur Wikipédia',
+                type: 'negative',
+                effect: () => activateDisorienter(),
+                icon: '🛸'
+            },
+            {
+                id: 'alien',
+                name: 'Alien',
+                description: 'Impose de visiter un article spécifique',
+                type: 'negative',
+                effect: () => activateDictator(),
+                icon: '👽'
+            },
+        ];
+
+        setArtifacts(allArtifacts);
+    }, []);
+
+    // Ajouter ces fonctions dans WikiGame
+
+    // GPS
+    const activateGPS = () => {
+        console.log('GPS activé - Chemin le plus court vers les objectifs');
+        // Surlignez dans le contenu les liens qui mènent aux objectifs
+        // Cette implémentation est simplifiée, en production cela nécessiterait
+        // une analyse du contenu et un algorithme de recherche de chemin
+        alert('Le GPS est activé ! Les liens vers vos objectifs sont surlignés en jaune.');
+        
+        const highlightLinks = () => {
+            const content = document.querySelector('.wiki-content');
+            if (!content) return;
+            
+            const links = content.querySelectorAll('a');
+            links.forEach(link => {
+                if (objectives.some(obj => obj.toLowerCase().includes(link.textContent!.toLowerCase()))) {
+                    link.classList.add('gps-highlight');
+                }
+            });
+        };
+        
+        setTimeout(highlightLinks, 500);
+    };
+
+    // Retour en arrière
+    const goBack = () => {
+        if (history.length > 1) {
+            const previousPage = history[history.length - 2];
+            setCurrentPage(previousPage);
+            setHistory(prev => prev.slice(0, -1));
+        } else {
+            alert("Vous n'avez pas d'article précédent dans votre historique.");
+        }
+    };
+
+    // Téléporteur
+    const activateTeleporter = async () => {
+        try {
+            // Téléporte vers un article qui pourrait être proche d'un objectif
+            // En pratique, nous prenons un article aléatoire pour simplifier
+            const response = await fetch("https://fr.wikipedia.org/api/rest_v1/page/random/title");
+            const data = await response.json();
+            const randomPage = data.items[0].title;
+            setCurrentPage(randomPage);
+            
+            // Informer les autres joueurs du changement
+            socket.emit("articleChanged", {
+                playerName: localStorage.getItem("playerName") || "Anonymous",
+                currentArticle: randomPage,
+            });
+            
+            alert(`Téléportation vers: ${randomPage}`);
+        } catch (error) {
+            console.error("Erreur lors de la téléportation", error);
+            alert("Téléportation échouée. Essayez à nouveau.");
+        }
+    };
+
+    // Mine
+    const placeMine = () => {
+        if (!currentPage) return;
+        
+        // Marquer la page comme minée
+        socket.emit('placeMine', {
+            playerName: localStorage.getItem("playerName") || "Anonymous",
+            minedArticle: currentPage,
+            partyCode,
+        });
+        
+        alert(`Mine placée sur ${currentPage}. Le prochain joueur qui visitera cette page perdra du temps!`);
+    };
+
+    // Escargot (Base Lunaire)
+    const activateSnail = () => {
+        setIsSnailActive(true);
+        alert("Base Lunaire activée! Vous êtes bloqué sur cette page pendant 1 minute.");
+        
+        setTimeout(() => {
+            setIsSnailActive(false);
+            alert("Effet de la Base Lunaire terminé. Vous pouvez à nouveau naviguer.");
+        }, 60000); // 1 minute
+    };
+
+    // Gomme (Laser)
+    const activateEraser = () => {
+        if (playerCompletedObjectives.length === 0) {
+            alert("Aucun objectif complété à effacer.");
+            return;
+        }
+        
+        // Retirer le dernier objectif complété
+        const newCompleted = [...playerCompletedObjectives];
+        const removedObjective = newCompleted.pop();
+        setPlayerCompletedObjectives(newCompleted);
+        
+        // Informer le serveur
+        const playerName = localStorage.getItem("playerName") || "Anonymous";
+        socket.emit('objectiveErased', {
+            partyCode,
+            playerName,
+            removedObjective,
+        });
+        
+        alert(`L'objectif "${removedObjective}" a été désintégré par le laser!`);
+    };
+
+    // Désorienteur (Ovni)
+    const activateDisorienter = async () => {
+        try {
+            const response = await fetch("https://fr.wikipedia.org/api/rest_v1/page/random/title");
+            const data = await response.json();
+            const randomPage = data.items[0].title;
+            
+            setCurrentPage(randomPage);
+            socket.emit("articleChanged", {
+                playerName: localStorage.getItem("playerName") || "Anonymous",
+                currentArticle: randomPage,
+            });
+            
+            alert(`Vous avez été capturé par un OVNI et déposé sur: ${randomPage}`);
+        } catch (error) {
+            console.error("Erreur lors de la désorientation", error);
+        }
+    };
+
+    // Dictateur (Alien)
+    const activateDictator = () => {
+        // Choisir un objectif restant aléatoire
+        if (remainingObjectives.length > 0) {
+            const randomIndex = Math.floor(Math.random() * remainingObjectives.length);
+            const forcedPage = remainingObjectives[randomIndex];
+            
+            alert(`Un alien vous impose de visiter: ${forcedPage}`);
+            
+            // Créer une animation qui guide le joueur vers cet objectif
+            const contentDiv = document.querySelector('.wiki-content');
+            if (contentDiv) {
+                const alienOverlay = document.createElement('div');
+                alienOverlay.className = 'alien-overlay';
+                alienOverlay.innerHTML = `<p>👽 Allez à: ${forcedPage}</p>`;
+                contentDiv.appendChild(alienOverlay);
+                
+                setTimeout(() => {
+                    contentDiv.removeChild(alienOverlay);
+                }, 5000);
+            }
+        } else {
+            alert("Les aliens n'ont pas d'objectif à vous imposer!");
+        }
+    };
 
     // ================ EFFETS CENTRALISÉS ================
     
@@ -181,7 +477,7 @@ function WikiGame() {
                                 setCurrentPage(startPage);
                                 
                                 // Charger le contenu
-                                const success = await fetchWikiContent(startPage);
+                                const success = await fetchWikiContent(startPage, true);
                                 
                                 // Si c'est un nouvel objectif, le marquer comme complété
                                 if (success && !playerCompleted.includes(startPage)) {
@@ -248,7 +544,7 @@ function WikiGame() {
                     const startPage = objectives[randomIndex];
                     setCurrentPage(startPage);
                     
-                    const success = await fetchWikiContent(startPage);
+                    const success = await fetchWikiContent(startPage, true);
                     
                     if (success) {
                         setPlayerCompletedObjectives([startPage]);
@@ -313,6 +609,54 @@ function WikiGame() {
             console.log("Déconnecté du serveur");
             setIsLoading(true);
         });
+
+        // Nouveaux écouteurs pour mise à jour conditionnelle
+        socket.on('playerJoined', ({ playerName }: { playerName: string }) => {
+            console.log(`Nouveau joueur: ${playerName}`);
+            // Ajouter le joueur à la liste sans rechargement complet
+            setPlayers(prev => {
+                if (prev.some(p => p.name === playerName)) return prev;
+                return [...prev, { name: playerName, currentArticle: "", objectiveCount: 0 }];
+            });
+        });
+        
+        socket.on('playerLeft', ({ playerName }: { playerName: string }) => {
+            console.log(`Joueur parti: ${playerName}`);
+            // Supprimer le joueur sans rechargement complet
+            setPlayers(prev => prev.filter(p => p.name !== playerName));
+        });
+        
+        socket.on('partyUpdated', () => {
+            console.log("Mise à jour importante de la partie détectée, rechargement des données");
+            fetchPartyData();
+        });
+
+        // Écouteur pour la fin de partie
+        socket.on('gameOver', ({ 
+            winner, 
+            playerStats 
+        }: { 
+            winner: string; 
+            playerStats: {
+                name: string;
+                completedObjectives: number;
+                isWinner: boolean;
+                visitedPages: number;
+            }[]
+        }) => {
+            console.log('Partie terminée! Gagnant:', winner);
+            console.log('Statistiques:', playerStats);
+            
+            setWinner(winner);
+            setPlayerStats(playerStats);
+            setGameOver(true);
+        });
+        
+        // Écouteur pour le redémarrage de partie
+        socket.on('gameRestarted', ({ newPartyCode }: { newPartyCode: string }) => {
+            console.log(`Partie redémarrée avec le code: ${newPartyCode}`);
+            navigate(`/lobby/${newPartyCode}`);
+        });
         
         // Nettoyage des écouteurs
         return () => {
@@ -321,16 +665,15 @@ function WikiGame() {
             socket.off('articleChanged');
             socket.off('objectiveProgress');
             socket.off('disconnect');
+            socket.off('playerJoined');
+            socket.off('playerLeft');
+            socket.off('partyUpdated');
+            socket.off('gameOver');
+            socket.off('gameRestarted');
         };
-    }, [fetchWikiContent, objectives, partyCode, updateRemainingObjectives]);
-    
-    // 4. Rafraîchissement périodique des données
-    useEffect(() => {
-        if (!partyCode) return;
-        
-        const intervalId = setInterval(fetchPartyData, 5000);
-        return () => clearInterval(intervalId);
-    }, [partyCode, fetchPartyData]);
+    }, [partyCode, fetchPartyData, fetchWikiContent, objectives, updateRemainingObjectives]);
+
+    // La fonction acquireArtifact est déjà définie plus haut, avant checkObjectiveCompletion
     
     // ================ GESTIONNAIRES D'ÉVÉNEMENTS ================
     
@@ -349,6 +692,17 @@ function WikiGame() {
             visitedArticles: history,
         });
         setShowPopup(true);
+    };
+
+    const handleQuitGame = () => {
+        navigate('/');
+    };
+
+    const handleRestartGame = () => {
+        if (partyCode) {
+            // Émettre l'événement pour redémarrer la partie
+            socket.emit('restartGame', { oldPartyCode: partyCode });
+        }
     };
     
     // Calcul dérivé pour le nombre d'objectifs complétés
@@ -430,6 +784,13 @@ function WikiGame() {
                                 className="wiki-content"
                                 dangerouslySetInnerHTML={{ __html: content }}
                                 onClick={(e) => {
+                                    // Si l'effet escargot est actif, bloquer la navigation
+                                    if (isSnailActive) {
+                                        alert("Vous êtes bloqué par la Base Lunaire! Attendez la fin de l'effet.");
+                                        e.preventDefault();
+                                        return;
+                                    }
+                                    
                                     const target = e.target as HTMLAnchorElement;
                                     if (target.tagName === "A") {
                                         e.preventDefault();
@@ -439,13 +800,78 @@ function WikiGame() {
                                             playerName: localStorage.getItem("playerName") || "Anonymous",
                                             currentArticle: newPage,
                                         });
+                                        
+                                        // Chance de déclencher un artefact négatif (20% de chance)
+                                        if (Math.random() < 0.2 && artifacts.length > 0) {
+                                            // Filtrer uniquement les artefacts négatifs
+                                            const negativeArtifacts = artifacts.filter(a => a.type === 'negative');
+                                            if (negativeArtifacts.length > 0) {
+                                                const randomIndex = Math.floor(Math.random() * negativeArtifacts.length);
+                                                const randomArtifact = negativeArtifacts[randomIndex];
+                                                
+                                                // Délai pour que l'artefact ne se déclenche pas immédiatement
+                                                setTimeout(() => {
+                                                    randomArtifact.effect();
+                                                    alert(`Oh non! Vous avez déclenché l'artefact: ${randomArtifact.name}`);
+                                                }, 1000);
+                                            }
+                                        }
                                     }
                                 }}
                             ></div>
                         </div>
 
                         <div className="artifacts-bar">
-                            <h2>Artéfacts</h2>
+                            <h2>Artefacts</h2>
+                            <div className="artifacts-list">
+                                {playerArtifacts[localStorage.getItem("playerName") || "Anonymous"]?.inventory.map((artifact, index) => (
+                                    <div
+                                        key={index}
+                                        className={`artifact ${artifact.type}`}
+                                        title={artifact.description}
+                                        onClick={() => {
+                                            artifact.effect();
+                                            
+                                            // Supprimer l'artefact de l'inventaire après utilisation (sauf GPS)
+                                            if (artifact.id !== 'satellite') {
+                                                setPlayerArtifacts(prev => {
+                                                    const playerName = localStorage.getItem("playerName") || "Anonymous";
+                                                    const playerData = prev[playerName];
+                                                    if (!playerData) return prev;
+                                                    
+                                                    return {
+                                                        ...prev,
+                                                        [playerName]: {
+                                                            ...playerData,
+                                                            inventory: playerData.inventory.filter((_, i) => i !== index),
+                                                        },
+                                                    };
+                                                });
+                                            }
+                                        }}
+                                    >
+                                        <span className="artifact-icon">{artifact.icon}</span>
+                                        <span className="artifact-name">{artifact.name}</span>
+                                    </div>
+                                )) || []}
+                            </div>
+                            {activeEffects.length > 0 && (
+                                <div className="active-effects">
+                                    <h3>Effets actifs:</h3>
+                                    {activeEffects.map((effect, index) => (
+                                        <div key={index} className="active-effect">
+                                            <span className="effect-icon">{effect.icon}</span>
+                                            <span className="effect-name">{effect.name}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            {isSnailActive && (
+                                <div className="snail-effect">
+                                    <span className="effect-icon">🏠</span>
+                                    <span className="effect-name">Base Lunaire active</span>
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -530,6 +956,56 @@ function WikiGame() {
                                     ))}
                                 </ul>
                                 <button onClick={() => setShowPopup(false)}>Fermer</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Overlay de fin de partie */}
+                    {gameOver && (
+                        <div className="game-over-overlay">
+                            <div className="game-over-content">
+                                <h1>Partie terminée!</h1>
+                                <h2>{winner} a gagné!</h2>
+                                
+                                <div className="podium">
+                                    <h3>Podium</h3>
+                                    <div className="podium-players">
+                                        {playerStats.map((player, index) => (
+                                            <div 
+                                                key={player.name} 
+                                                className={`podium-player ${player.isWinner ? 'winner' : ''} rank-${index + 1}`}
+                                            >
+                                                <span className="podium-rank">{index + 1}</span>
+                                                <span className="podium-name">{player.name}</span>
+                                                <div className="podium-stats">
+                                                    <div className="stat">
+                                                        <span className="stat-label">Objectifs:</span>
+                                                        <span className="stat-value">{player.completedObjectives}</span>
+                                                    </div>
+                                                    <div className="stat">
+                                                        <span className="stat-label">Pages visitées:</span>
+                                                        <span className="stat-value">{player.visitedPages}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                
+                                <div className="game-over-actions">
+                                    <button 
+                                        onClick={handleQuitGame}
+                                        className="quit-button"
+                                    >
+                                        Quitter
+                                    </button>
+                                    <button 
+                                        onClick={handleRestartGame}
+                                        className="restart-button"
+                                    >
+                                        Recommencer
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     )}
