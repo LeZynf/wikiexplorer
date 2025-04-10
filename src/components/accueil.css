@@ -169,7 +169,7 @@ th, td {
     font-size: 1.5vw;
     margin: 4px 2px;
     cursor: pointer;
-    padding: 10px 24px;
+    padding: 2px 0;
     font-family: 'Instrument Serif', serif;
     font-style: italic;
     -webkit-text-stroke-width: 1px;

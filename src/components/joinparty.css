@@ -29,8 +29,11 @@
     flex-direction: column;
     justify-content: stretch;
     gap: 1vh;
+    min-width: 200px;
 }
-
+ .ButtonHolder button{
+    min-width: 200px;
+ }
 .container {
     display: flex;
     flex-direction: column;
@@ -51,7 +54,7 @@
     font-size: 3vw;
     margin: 4px 2px;
     cursor: pointer;
-    padding: 10px 24px;
+    padding: 1vw 1vw;
     font-family: 'Instrument Serif', serif;
     font-style: italic;
     -webkit-text-stroke-width: 1px;

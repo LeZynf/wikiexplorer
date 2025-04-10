@@ -89,3 +89,144 @@
     -webkit-text-fill-color: transparent;
     margin: 0;
 }
+
+/* Styles pour l'overlay de victoire */
+.victory-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.victory-content {
+    background-color: #1a2a4b;
+    border: 3px solid #ffcc00;
+    border-radius: 10px;
+    padding: 2rem;
+    text-align: center;
+    color: white;
+    max-width: 500px;
+    box-shadow: 0 0 20px rgba(255, 204, 0, 0.5);
+    animation: scaleIn 0.3s ease;
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.victory-content h1 {
+    color: #ffcc00;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.victory-content h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: #ffffff;
+}
+
+.victory-content p {
+    margin: 0.5rem 0;
+    font-size: 1.2rem;
+    color: #dddddd;
+}
+
+.victory-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.victory-actions button {
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.victory-actions button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.restart-button {
+    background-color: #4caf50;
+    color: white;
+}
+
+.home-button {
+    background-color: #3f51b5;
+    color: white;
+}
+
+.completion-time {
+    margin: 1rem 0;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 204, 0, 0.2);
+    border: 2px solid #ffcc00;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.completion-time h3 {
+    margin: 0;
+    color: #ffcc00;
+    font-size: 1.5rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.8; }
+    50% { opacity: 1; }
+    100% { opacity: 0.8; }
+}
+
+/* Ajouter ces styles dans sologame.css */
+.new-record {
+    background-color: gold;
+    color: #333;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    animation: pulse-gold 1.5s infinite;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+@keyframes pulse-gold {
+    0% { background-color: gold; }
+    50% { background-color: #ffd700; box-shadow: 0 0 15px gold; }
+    100% { background-color: gold; }
+}
+
+.previous-record {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 10px;
+    border-radius: 5px;
+    margin: 10px 0;
+    font-size: 0.9rem;
+}
+
+.previous-record p {
+    margin: 5px 0;
+    color: #cccccc;
+}
