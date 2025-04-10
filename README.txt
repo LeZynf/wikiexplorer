@@ -12,3 +12,6 @@ Lancer le site localhost:5173
 Sur le jeu :
 Choisir entre le mode solo et le mode multijoueur en créant ou en rejoignant une partie
 En créant une partie, l'hôte peut modifier les paramètres de jeu
+
+Lien du github :
+https://github.com/LeZynf/wikiexplorer
