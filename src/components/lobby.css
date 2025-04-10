@@ -1,33 +1,31 @@
 @import url('https://fonts.googleapis.com/css2?family=Contrail+One&display=swap');
 
-
 .lobbygrid {
     display: grid;
-    grid-template-columns: 0.5fr repeat(3, 1fr)  0.5fr repeat(3, 1fr)   repeat(5, 1fr)  0.5fr ;
+    grid-template-columns: 0.5fr repeat(3, 1fr)  0.5fr repeat(3, 1fr)   repeat(5, 1fr)  0.5fr;
     grid-template-rows: repeat(3, 1fr)  0.5fr repeat(15, 1fr) 0.5fr;
     grid-column-gap: 1vw;
     grid-row-gap: 1vw;
     width: 100vw;
     height: 100vh;
+}
 
-    }
-         
-    .paramlob { grid-area: 7 / 6 / 16 / 9;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        font-size: 1.2rem;
-        text-align: left;
-    }
+.paramlob {
+    grid-area: 7 / 6 / 16 / 9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 1.2rem;
+    text-align: left;
+}
 
-    .hostlob { grid-area: 3 / 6 / 4 / 10;
-        text-align: center;
-        justify-content: center;
-       }
+.hostlob {
+    grid-area: 3 / 6 / 4 / 10;
+    text-align: center;
+    justify-content: center;
+}
 
-
-
-    .playerlob {
+.playerlob {
     grid-area: 4 / 2 / 11 / 5;
     display: flex;
     flex-direction: column;
@@ -36,199 +34,233 @@
     gap: 1vh;
     align-items: center;
     text-align: center;
-    }
+}
 
-    .border-b{
-        padding: 5px;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.40);
-        border-radius: 20px;
-        border: 2px solid #5651F6;
-    }
+.border-b{
+    padding: 5px;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.40);
+    border-radius: 20px;
+    border: 2px solid #5651F6;
+}
 
-    .border-w{
-        width: 100%;
-        height: 100%;
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 20px;
-        border: 2px solid #5651F6;
-    }
+.border-w{
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    border: 2px solid #5651F6;
+}
 
-    .bouttonback {  grid-area: 2 / 2 / 4 / 5;
-       }
+.bouttonback {
+    grid-area: 2 / 2 / 4 / 5;
+}
 
-  
-    .buttonplay { grid-area: 17 / 6 / 19 / 10;
-    
-    }
+.buttonplay {
+    grid-area: 17 / 6 / 19 / 10;
+}
 
-    .buttonplay , .bouttonback ,.parambutton{
-
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .chatlob { 
-    
-        grid-area: 12 / 2 / 19 / 5; 
-        text-align: left;
-       
-      
-        font-size: 1rem;
-        padding-left: 10px;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-end;
-        padding-top: 10px;
-        align-items: center;
-        overflow: hidden;
-    }
-    .chat {
-        display: flex;
-        flex-direction: column;
-        word-wrap: break-word;
-      width: 100%;
-      min-height: 90%;
-      height: 90%;
-      overflow-y: auto;
-    }
-
-    .chatlob p {
-        width: 90%;
-        background: rgba(0, 0, 0, 0.20);
-        border-radius: 20px;
-        border: 2px solid #5651F6;
-        padding: 2px 10px;
-        font-family: 'Instrument Serif', serif;
-        font-size: 1rem;
-        color: black;
-        margin-bottom: 10px;
-    }
-    .chatlob input{
-        width: 80%;
-        height: 10%;
-        background: rgba(0, 0, 0, 0.20);
-        border-radius: 20px;
-        border: 2px solid #5651F6;
-        padding: 10px;
-        font-family: 'Instrument Serif', serif;
-        font-size: 1.5rem;
-        color: rgb(255, 255, 255);
-        margin-bottom: 10px;
-    }
-
-    .playerlob::-webkit-scrollbar, .chat::-webkit-scrollbar {
-        width: 12px;
-        border-radius: 40px;
-
-    }
-
-    .playerlob::-webkit-scrollbar-track, .chat::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-top-left-radius: 0 !important;
-        border-bottom-left-radius: 0 !important;
-    }
-
-    .playerlob::-webkit-scrollbar-thumb, .chat::-webkit-scrollbar-thumb {
-        background: var(--primary-color);
-        border-radius: 40px;
-
-    }
-
-    .playerlob::-webkit-scrollbar-thumb:hover, .chat::-webkit-scrollbar-thumb:hover {
-        background: rgb(15, 14, 15, 0.3);
-    }
-
-
-    .artefactlob { grid-area: 4 / 6 / 17 / 14; 
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-items: center;
-        justify-content: space-evenly;
-        gap: 1px;
-
-    }
-
-  
-    .titlelob { grid-area: 1 / 6 / 4 / 13; 
-        text-align: center;
-        font-size: 3rem;
-
-    }
-    .codelob {grid-area: 3 / 11 / 4 / 15;
-       text-align: center;
-    }
-
-    h2 {
-        font-size: 2rem;
-        -webkit-text-stroke-width: 2px;
-        -webkit-text-stroke-color: #000;
-        font-family: "Instrument Serif";
-
-        font-style: italic;
-        font-weight: 400;
-        line-height: normal;
-    }
-    .playerbubble {
-        width: 80%;
-       
-        background: rgba(0, 0, 0, 0.20);
-        border-radius: 20px;
-        border: 2px solid #5651F6;
-       
-        padding: 10px;
-        display: flex;
-        flex-direction: column;
-        text-align: center;
-        justify-content: center;
-        font-family: 'Instrument Serif', serif;
-        font-size: 1.5rem;
-        color: black;
-    }
-    .playerbubble:hover {
-        background: rgba(0, 0, 0, 0.30);
-        scale: 1.05;
-    } 
-
-    .bouttonback button, .buttonplay button , .parambutton button{
-        font-size: 2vw;
-        background: rgba(255, 255, 255, 0.3);
-    
-    }
-
-  .artefactlob div {
+.buttonplay, .bouttonback, .parambutton {
     display: flex;
     flex-direction: column;
-        width: 23%;
-        height: 25%;
-        align-items: center;
-       justify-content: center;
-    }
-
-    .artefactlob div:hover {
-       
-        scale: 1.05;
-    }
-
-
-    .artefactlob div img { background: #D9D9D9;
-        border-radius: 20px;
-        border: 2px solid #5651F6;
-    
-        display: flex;
-        flex-direction: column;
-        text-align: center;
-        justify-content: center;
-        font-family: 'Instrument Serif', serif;
-        font-size: 2vw;
-        color: black;
-width: 70%;
+    align-items: center;
+    justify-content: center;
 }
-.artefactlob div  h3 {
+
+.chatlob {
+    grid-area: 12 / 2 / 19 / 5;
+    text-align: left;
+    font-size: 1rem;
+    padding-left: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-top: 10px;
+    align-items: center;
+    overflow: hidden;
+}
+
+.chat {
+    display: flex;
+    flex-direction: column;
+    word-wrap: break-word;
+    width: 100%;
+    min-height: 90%;
+    height: 90%;
+    overflow-y: auto;
+}
+
+.chatlob p {
+    width: 90%;
+    background: rgba(0, 0, 0, 0.20);
+    border-radius: 20px;
+    border: 2px solid #5651F6;
+    padding: 2px 10px;
+    font-family: 'Instrument Serif', serif;
+    font-size: 1rem;
+    color: black;
+    margin-bottom: 10px;
+}
+
+.chatlob input{
+    width: 80%;
+    height: 10%;
+    background: rgba(0, 0, 0, 0.20);
+    border-radius: 20px;
+    border: 2px solid #5651F6;
+    padding: 10px;
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.5rem;
+    color: rgb(255, 255, 255);
+    margin-bottom: 10px;
+}
+
+.playerlob::-webkit-scrollbar, .chat::-webkit-scrollbar {
+    width: 12px;
+    border-radius: 40px;
+}
+
+.playerlob::-webkit-scrollbar-track, .chat::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+}
+
+.playerlob::-webkit-scrollbar-thumb, .chat::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 40px;
+}
+
+.playerlob::-webkit-scrollbar-thumb:hover, .chat::-webkit-scrollbar-thumb:hover {
+    background: rgb(15, 14, 15, 0.3);
+}
+
+.artefactlob {
+    grid-area: 4 / 6 / 17 / 14;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    align-items: center;
+    justify-items: center;
+    gap: 10px;
+    padding: 15px;
+}
+
+.titlelob {
+    grid-area: 1 / 6 / 4 / 13;
+    text-align: center;
+    font-size: 3rem;
+}
+
+.codelob {
+    grid-area: 3 / 11 / 4 / 15;
+    text-align: center;
+}
+
+h2 {
+    font-size: 2rem;
+    -webkit-text-stroke-width: 2px;
+    -webkit-text-stroke-color: #000;
+    font-family: "Instrument Serif";
+    font-style: italic;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.playerbubble {
+    width: 80%;
+    background: rgba(0, 0, 0, 0.20);
+    border-radius: 20px;
+    border: 2px solid #5651F6;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    justify-content: center;
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.5rem;
+    color: black;
+}
+
+.playerbubble:hover {
+    background: rgba(0, 0, 0, 0.30);
+    scale: 1.05;
+}
+
+.bouttonback button, .buttonplay button, .parambutton button {
+    font-size: 2vw;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Styles pour les artefacts */
+.artifact-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.artifact-container:hover {
+    transform: scale(1.05);
+}
+
+.artifact-container.positive:hover {
+    box-shadow: 0 0 15px rgba(86, 81, 246, 0.7);
+}
+
+.artifact-container.negative:hover {
+    box-shadow: 0 0 15px rgba(86, 81, 246, 0.7);
+}
+
+.artifact-container img {
+    width: 70%;
+    height: auto;
+    object-fit: contain;
+    background: #D9D9D9;
+    border-radius: 20px;
+    border: 2px solid #5651F6;
+    margin-bottom: 5px;
+}
+
+.artifact-container.disabled {
+    opacity: 0.6;
+    position: relative;
+}
+
+.artifact-container.disabled::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 20px;
+}
+
+.artifact-container.disabled img {
+    filter: grayscale(100%);
+}
+
+.artifact-disabled-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-family: 'Contrail One', sans-serif;
+    font-size: 1.2rem;
+    z-index: 2;
+    text-shadow: 1px 1px 2px black;
+}
+
+.artefactlob h3 {
     margin-top: 5px;
     text-align: center;
     font-family: "Contrail One" !important;
@@ -240,107 +272,173 @@ width: 70%;
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+}
 
+.parambutton {
+    grid-area: 17 / 11 / 19 / 13;
+}
+
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.popup-content {
+    position: relative;
+    min-width: 300px;
+    max-width: 80%;
+    height: auto;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid #5651F6;
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(10px);
+}
+
+.popup-content h2 {
+    font-size: 3rem;
+    -webkit-text-stroke-width: 0px;
+    font-family: "Instrument Serif";
+    font-style: italic;
+    font-weight: 400;
+    line-height: bold;
+    color: white;
+    margin-bottom: 20px;
+}
+
+.popup-buttons {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.popup-buttons button {
+    font-size: 1.5rem;
+    background: rgba(86, 81, 246, 0.3);
+    border-radius: 20px;
+    font-weight: 400;
+    border: 2px solid #5651F6;
+    padding: 10px 20px;
+    margin: 0 10px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.popup-buttons button:hover {
+    background: rgba(86, 81, 246, 0.5);
+}
+
+.artifact-description {
+    max-width: 400px;
+    text-align: center;
+    color: white;
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.2rem;
+    padding: 0 20px;
+}
+
+.artifact-type {
+    font-weight: bold;
+    margin-top: 15px;
+    font-size: 1.3rem;
+    font-family: 'Contrail One', sans-serif;
+}
+
+.artifact-type.positive {
+    color: green;
+}
+
+.artifact-type.negative {
+    color: #FF3D3D;
+}
+
+.GameName {
+    text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    -webkit-text-stroke-width: 2px;
+    -webkit-text-stroke-color: #000;
+    font-family: Iceberg;
+    font-size: 64px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    background: linear-gradient(130deg, #241ECB 33.36%, #000 70.06%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.chat-input-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 10%;
+}
+
+.chat-send-button {
+    background: rgba(86, 81, 246, 0.3);
+    border-radius: 20px;
+    border: 2px solid #5651F6;
+    width: 20%;
+    height: 100%;
+    color: white;
+    font-size: 1rem;
+    margin-bottom: 10px;
+    padding: 0 0;
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: #ffffff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.chat-send-button:hover {
+    background: rgba(86, 81, 246, 0.5);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .artefactlob {
+        grid-template-columns: repeat(3, 1fr);
     }
+}
 
-      
-    .parambutton {  grid-area: 17 / 11 / 19 / 13;
-    
-    }
-
-    .popup-overlay {
-
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
+@media (max-width: 768px) {
+    .artefactlob {
+        grid-template-columns: repeat(2, 1fr);
     }
 
     .popup-content {
-        position: relative;
-        min-width: 300px;
-        height: auto;
-        background: rgba(0, 0, 0, 0.3);
-        border: #ffffff 2px solid;
-        border-radius: 20px;
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        backdrop-filter: blur(10px);
+        min-width: 250px;
+        padding: 15px;
     }
 
     .popup-content h2 {
-        font-size: 3rem;
-        -webkit-text-stroke-width: 0px;
-
-        font-family: "Instrument Serif";
-
-        font-style: italic;
-        font-weight: 400;
-        line-height: bold;
+        font-size: 2rem;
     }
 
-    .popup-buttons button{
-        font-size: 2.5rem;
-        background: rgba(0, 0, 0, 0.3);
-        -webkit-text-stroke-width: 0px;
-        border-radius: 20px;
-        font-weight: 400;
-        border: 2px solid #ffffff !important;
-        padding: 10px;
-        margin-top: 20px;
-        color: rgb(255, 255, 255) !important;
-        max-width: 100PX;
+    .popup-buttons button {
+        font-size: 1.2rem;
+        padding: 8px 15px;
     }
-
-    .GameName {
-        text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-        -webkit-text-stroke-width: 2px;
-        -webkit-text-stroke-color: #000;
-        font-family: Iceberg;
-        font-size: 64px;
-        font-style: normal;
-        font-weight: 400;
-        line-height: normal;
-        background: linear-gradient(130deg, #241ECB 33.36%, #000 70.06%);
-        background-clip: text;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    .chat-input-container {
-      
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        height: 10%;
-    }
-    .chat-send-button
-    {
-        background: rgba(0, 0, 0, 0.3);
-        border-radius: 20px;
-        border: 2px solid #ffffff !important;
-    width: 20%;
-       height: 100%;
-        color: rgb(255, 255, 255) !important;
-        font-size: 1rem;
-
-        margin-bottom: 10px;
-        padding: 0 0;
-        font-family: 'Instrument Serif', serif;
-        font-style: italic;
-        -webkit-text-stroke-width: 1px;
-        -webkit-text-stroke-color: #ffffff;
-    }
+}
 
 
  

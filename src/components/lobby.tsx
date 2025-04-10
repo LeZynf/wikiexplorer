@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom'; // Added useNavigate for navigation
+import { useParams, useNavigate } from 'react-router-dom';
 import ChatMessage from './chat/ChatMessage';
 import './accueil.css';
 import './lobby.css';
@@ -11,111 +11,164 @@ import baseLunaireArt from '../assets/base-lunaire_art.svg';
 import laserArt from '../assets/laser_art.svg';
 import ovniArt from '../assets/ovni_art.svg';
 import alienArt from '../assets/alien_art.svg';
-import socket from '../services/socket'; // Importer le socket partagé au lieu d'en créer un nouveau
+import socket from '../services/socket';
 
 interface LobbyProps {
-  // Le partyCode peut être passé en prop ou récupéré depuis l'URL
   partyCode?: string;
-  // Le nom du joueur actuel
   playerName?: string;
 }
 
+interface Artifact {
+  id: string;
+  name: string;
+  description: string;
+  type: 'positive' | 'negative';
+  enabled: boolean;
+}
+
 const Lobby: React.FC<LobbyProps> = ({ partyCode: propPartyCode, playerName: propPlayerName }) => {
-  const { partyCode: urlPartyCode } = useParams<{ partyCode: string }>();  // Récupère le partyCode depuis l'URL
-  const navigate = useNavigate(); // Hook pour la navigation
-  
-  // Utiliser le partyCode des props s'il existe, sinon celui de l'URL
+  const { partyCode: urlPartyCode } = useParams<{ partyCode: string }>();
+  const navigate = useNavigate();
+
   const partyCode = propPartyCode || urlPartyCode;
-  
-  const [players, setPlayers] = useState<string[]>([]);  // Liste des joueurs
-  const [currentPlayerName, setCurrentPlayerName] = useState<string>(propPlayerName || ''); // Nom du joueur actuel
+
+  const [players, setPlayers] = useState<string[]>([]);
+  const [currentPlayerName, setCurrentPlayerName] = useState<string>(propPlayerName || '');
   const [settings, setSettings] = useState({
-    difficulty: 'normal',   // Difficulté par défaut
-    timeLimit: 300,          // Temps limite par défaut
-    sitesToVisit: 2,        // Nombre de sites à visiter pour gagner
+    difficulty: 'normal',
+    timeLimit: 300,
+    sitesToVisit: 2,
   });
-  const [host, setHost] = useState<string>('');  // Hôte (créateur de la party)
-  const [isHost, setIsHost] = useState<boolean>(false); // New state to track if current player is host
-  const [settingsChanged, setSettingsChanged] = useState<boolean>(false); // Track if settings were changed
-  const [showSettings, setShowSettings] = useState<boolean>(false); // State to show/hide settings popup
+  const [host, setHost] = useState<string>('');
+  const [isHost, setIsHost] = useState<boolean>(false);
+  const [settingsChanged, setSettingsChanged] = useState<boolean>(false);
+  const [showSettings, setShowSettings] = useState<boolean>(false);
   const [chatMessages, setChatMessages] = useState<{ playerName: string; message: string; timestamp: string }[]>([]);
-  
-  
-  // Fonction pour récupérer les détails de la party
+  const [selectedArtifact, setSelectedArtifact] = useState<Artifact | null>(null);
+  const [showArtifactDescription, setShowArtifactDescription] = useState<boolean>(false);
+
+  const [artifacts, setArtifacts] = useState<Artifact[]>([
+    {
+      id: 'satellite',
+      name: 'Satellite',
+      description: 'Scanne et montre le chemin le plus court vers les articles cibles',
+      type: 'positive',
+      enabled: true
+    },
+    {
+      id: 'Rocket',
+      name: 'Fusée',
+      description: 'Retourne à l\'article précédent en hyperespace',
+      type: 'positive',
+      enabled: true
+    },
+    {
+      id: 'teleporter',
+      name: 'Téléporteur',
+      description: 'Se téléporte à 2 liens d\'un article cible',
+      type: 'positive',
+      enabled: true
+    },
+    {
+      id: 'meteorite',
+      name: 'Météorite',
+      description: 'Lance une pluie de météorite sur un article pour piéger les autres joueurs',
+      type: 'positive',
+      enabled: true
+    },
+    {
+      id: 'moonbase',
+      name: 'Base Lunaire',
+      description: 'Vous restez à admirer la Terre depuis la Lune pendant 1 minute',
+      type: 'negative',
+      enabled: true
+    },
+    {
+      id: 'laser',
+      name: 'Laser',
+      description: 'Désintègre le dernier objectif atteint',
+      type: 'negative',
+      enabled: true
+    },
+    {
+      id: 'ufo',
+      name: 'Ovni',
+      description: 'Capture et relâche aléatoirement sur Wikipédia',
+      type: 'negative',
+      enabled: true
+    },
+    {
+      id: 'alien',
+      name: 'Alien',
+      description: 'Impose de visiter un article spécifique ou vous êtes désintégré sur le champ',
+      type: 'negative',
+      enabled: true
+    },
+  ]);
+
   const fetchPartyDetails = async () => {
     if (!partyCode) return;
-    
+
     try {
       console.log('Fetching party details for code:', partyCode);
       const response = await fetch(`http://localhost:5000/party/${partyCode}`);
       const data = await response.json();
-  
+
       if (data.success) {
         setPlayers(data.party.players);
         setHost(data.party.creator);
-        // Mettre à jour les paramètres avec ceux de la base de données
         if (data.party.settings) {
           setSettings(data.party.settings);
+        }
+        if (data.party.artifacts) {
+          setArtifacts(data.party.artifacts);
         }
       }
     } catch (error) {
       console.error('Error fetching party details:', error);
     }
   };
-  
-  // Appel initial à l'API pour récupérer les détails de la party
+
   useEffect(() => {
     fetchPartyDetails();
-  }, [partyCode]); // Le useEffect se déclenche à chaque fois que le partyCode change
-  
-  // Rafraîchissement périodique des détails de la party
+  }, [partyCode]);
+
   useEffect(() => {
     if (!partyCode) return;
-    
-    // Rafraîchir les détails toutes les 5 secondes
     const intervalId = setInterval(fetchPartyDetails, 5000);
-    
-    // Nettoyer l'intervalle lorsque le composant est démonté
     return () => clearInterval(intervalId);
   }, [partyCode, settingsChanged, currentPlayerName]);
-  
-  // Définir le nom du joueur actuel au chargement du composant
+
   useEffect(() => {
     if (propPlayerName) {
       setCurrentPlayerName(propPlayerName);
-      // Check if player is host when player name is set
       if (host && propPlayerName === host) {
         setIsHost(true);
       }
     } else {
-      // Try to get from localStorage if not provided as prop
       const storedName = localStorage.getItem('playerName');
       if (storedName) {
         setCurrentPlayerName(storedName);
       }
     }
   }, [propPlayerName, host]);
-  
-  // Fonction pour gérer les changements dans les paramètres
+
   const handleSettingChange = (setting: string, value: any) => {
     if (!isHost) return;
-    
+
     const newSettings = {
       ...settings,
       [setting]: value,
     };
-    
+
     setSettings(newSettings);
     setSettingsChanged(true);
-    
-    // Call updatePartySettings immediately when a setting changes
     updatePartySettings(newSettings);
   };
-  
-  // Function to update party settings on the server
+
   const updatePartySettings = async (newSettings: typeof settings) => {
     if (!isHost || !partyCode) return;
-    
+
     try {
       const response = await fetch(`http://localhost:5000/update-party-settings`, {
         method: 'POST',
@@ -123,51 +176,84 @@ const Lobby: React.FC<LobbyProps> = ({ partyCode: propPartyCode, playerName: pro
         body: JSON.stringify({
           partyCode,
           settings: newSettings,
-          hostName: currentPlayerName
+          hostName: currentPlayerName,
+          artifacts // Envoyer aussi l'état des artefacts
         }),
       });
-      
+
       const data = await response.json();
       if (!data.success) {
         console.error('Failed to update settings:', data.message);
-        // Restore previous settings if update failed
         setSettings(settings);
       }
     } catch (error) {
       console.error('Error updating settings:', error);
-      // Restore previous settings if update failed
       setSettings(settings);
     }
   };
-  
-  // Fonction pour démarrer la partie (logique à compléter)
+
+  const toggleArtifact = (id: string) => {
+    if (!isHost) return;
+
+    const updatedArtifacts = artifacts.map(artifact => {
+      if (artifact.id === id) {
+        return { ...artifact, enabled: !artifact.enabled };
+      }
+      return artifact;
+    });
+
+    setArtifacts(updatedArtifacts);
+    updateArtifacts(updatedArtifacts);
+  };
+
+  const updateArtifacts = async (updatedArtifacts: Artifact[]) => {
+    if (!isHost || !partyCode) return;
+
+    try {
+      const response = await fetch(`http://localhost:5000/update-artifacts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          partyCode,
+          artifacts: updatedArtifacts,
+          hostName: currentPlayerName
+        }),
+      });
+
+      const data = await response.json();
+      if (!data.success) {
+        console.error('Failed to update artifacts:', data.message);
+        setArtifacts(artifacts);
+      }
+    } catch (error) {
+      console.error('Error updating artifacts:', error);
+      setArtifacts(artifacts);
+    }
+  };
+
+  const showArtifactInfo = (artifact: Artifact) => {
+    setSelectedArtifact(artifact);
+    setShowArtifactDescription(true);
+  };
+
   const handleStartGame = () => {
     console.log('La partie commence avec les paramètres :', settings);
-  
-    // Émettre un événement pour informer tous les joueurs que la partie commence
     socket.emit('startGame', { partyCode });
-  
-    // Rediriger l'hôte vers la page de jeu
     if (partyCode) {
       navigate(`/wikigame/${partyCode}`);
     } else {
       console.error('Le code de la partie est manquant.');
     }
   };
-  
-  // Fonction pour quitter la partie et retourner à l'accueil
+
   const handleLeaveParty = async () => {
-    // Si le partyCode n'est pas défini, simplement retourner à l'accueil
     if (!partyCode) {
       navigate('/');
       return;
     }
-  
+
     try {
-      // Utiliser le nom du joueur actuel stocké dans l'état
       const playerNameToUse = currentPlayerName || (host === players[0] ? host : players[players.length - 1]);
-      
-      // Appel à l'API pour quitter la partie
       const response = await fetch('http://localhost:5000/leave-party', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -176,36 +262,21 @@ const Lobby: React.FC<LobbyProps> = ({ partyCode: propPartyCode, playerName: pro
           playerName: playerNameToUse,
         }),
       });
-  
+
       const data = await response.json();
-      
       if (data.success) {
         console.log('Partie quittée avec succès');
-        if (data.partyDeleted) {
-          console.log('La partie a été supprimée car elle est vide');
-        }
       } else {
         console.error('Erreur lors de la sortie de la partie:', data.message);
       }
     } catch (error) {
       console.error('Erreur lors de la communication avec le serveur:', error);
     }
-    
-    // Redirection vers la page d'accueil
+
     navigate('/');
   };
-  
-  // Function to toggle artifact status
-  //const toggleArtifact = (index: number) => {
-    //if (!isHost) return; // Only host can toggle artifacts
-    
-    // Here you would implement the logic to toggle artifacts
-    //console.log(`Toggling artifact ${index}`);
-    // This would be expanded when you implement the artifacts feature
-  //};
 
   useEffect(() => {
-    // Listen for incoming chat messages
     socket.on('receiveMessage', (message: { playerName: string; message: string; timestamp: string }) => {
       setChatMessages((prevMessages) => [...prevMessages, message]);
     });
@@ -216,7 +287,6 @@ const Lobby: React.FC<LobbyProps> = ({ partyCode: propPartyCode, playerName: pro
   }, []);
 
   useEffect(() => {
-    // Écouter l'événement "startGame" pour rediriger les joueurs
     socket.on('startGame', ({ partyCode }: { partyCode: string }) => {
       console.log('La partie commence pour tous les joueurs.');
       navigate(`/wikigame/${partyCode}`);
@@ -228,13 +298,17 @@ const Lobby: React.FC<LobbyProps> = ({ partyCode: propPartyCode, playerName: pro
   }, [navigate]);
 
   useEffect(() => {
-    // Écouter les mises à jour des paramètres
     socket.on('settingsUpdated', (updatedSettings: { difficulty: string; timeLimit: number; sitesToVisit: number }) => {
       setSettings(updatedSettings);
     });
 
+    socket.on('artifactsUpdated', (updatedArtifacts: Artifact[]) => {
+      setArtifacts(updatedArtifacts);
+    });
+
     return () => {
       socket.off('settingsUpdated');
+      socket.off('artifactsUpdated');
     };
   }, []);
 
@@ -244,169 +318,171 @@ const Lobby: React.FC<LobbyProps> = ({ partyCode: propPartyCode, playerName: pro
       message,
       timestamp: new Date().toISOString(),
     };
-  
-    socket.emit('sendMessage', chatMessage); // Envoyer le message au serveur
+    socket.emit('sendMessage', chatMessage);
   };
-  
+
   return (
-<div className="bg">
-<div className="lobbygrid">
-    <div className='titlelob'>
-        <h1 className="GameName">WikiExplorer</h1>
-    </div>
-  
-  <div className='codelob'>
-    <h2><strong>Code:</strong> {partyCode}</h2>
-  </div>
+      <div className="bg">
+        <div className="lobbygrid">
+          <div className='titlelob'>
+            <h1 className="GameName">WikiExplorer</h1>
+          </div>
 
-<div className='hostlob'>
-   <h2><strong>Créateur:</strong> {host}</h2>
-</div>
-  
-<div className='artefactlob border-b'>
-  <div>
-    <img src={staliteArt} alt="stalite" />
-    <h3>Satellite</h3>
-  </div>
-  <div>
-    <img src={fuseeArt} alt="fusée" />
-    <h3>Fusée</h3>
-  </div>
-  <div>
-    <img src={teleportArt} alt="teleport" />
-    <h3>Téléporteur</h3>
-  </div>
-  <div>
-    <img src={meteoriteArt} alt="meteorite" />
-    <h3>Météorite</h3>
-  </div>
-  <div>
-    <img src={baseLunaireArt} alt="base lunaire" />
-    <h3>Base Lunaire</h3>
-  </div>
-  <div>
-    <img src={laserArt} alt="laser" />
-    <h3>Laser</h3>
-  </div>
-  <div>
-    <img src={ovniArt} alt="ovni" />
-    <h3>Ovni</h3>
-  </div>
-  <div>
-    <img src={alienArt} alt="alien" />
-    <h3>Alien</h3>
-</div>
-</div>
+          <div className='codelob'>
+            <h2><strong>Code:</strong> {partyCode}</h2>
+          </div>
 
-<div className='playerlob border-b'>
-      <h2>Joueurs :</h2>
-      
-        {players.map((player, index) => (
-          <div className='playerbubble' key={index}>{player}</div>
-        ))}
-      
-</div>
+          <div className='hostlob'>
+            <h2><strong>Créateur:</strong> {host}</h2>
+          </div>
 
-<div className="chatlob border-b">
-  <div className="chat">
-    {chatMessages.map((msg, index) => (
-      <ChatMessage key={index} username={msg.playerName} message={msg.message} timestamp={msg.timestamp} />
-    ))}
-  </div>
-  <div className="chat-input-container">
-    <input
-      type="text"
-      onKeyDown={(e) => {
-        if (e.key === 'Enter') {
-          const input = e.target as HTMLInputElement;
-          const message = input.value.trim();
-          if (message !== '') {
-            handleSendMessage(message);
-            input.value = '';
-          }
-        }
-      }}
-      placeholder="Type your message..."
-      className="chat-input"
-    />
-    <button
-      onClick={() => {
-        const input = document.querySelector('.chat-input') as HTMLInputElement;
-        const message = input.value.trim();
-        if (message !== '') {
-          handleSendMessage(message);
-          input.value = '';
-        }
-      }}
-      className="chat-send-button"
-    >
-      Send
-    </button>
-  </div>
-</div>
+          <div className='artefactlob border-b'>
+            {artifacts.map((artifact) => (
+                <div
+                    key={artifact.id}
+                    className={`artifact-container ${!artifact.enabled ? 'disabled' : ''} ${artifact.type}`}
+                    onClick={() => isHost && toggleArtifact(artifact.id)}
+                    onDoubleClick={() => showArtifactInfo(artifact)}
+                >
+                  <img
+                      src={
+                        artifact.id === 'satellite' ? staliteArt :
+                            artifact.id === 'Rocket' ? fuseeArt :
+                                artifact.id === 'teleporter' ? teleportArt :
+                                    artifact.id === 'meteorite' ? meteoriteArt :
+                                        artifact.id === 'moonbase' ? baseLunaireArt :
+                                            artifact.id === 'laser' ? laserArt :
+                                                artifact.id === 'ufo' ? ovniArt :
+                                                    alienArt
+                      }
+                      alt={artifact.name}
+                      className={!artifact.enabled ? 'grayscale' : ''}
+                  />
+                  <h3>{artifact.name}</h3>
+                  {!artifact.enabled && <div className="artifact-disabled-overlay">Désactivé</div>}
+                </div>
+            ))}
+          </div>
 
-<div className='bouttonback'><button onClick={handleLeaveParty}>BACK</button></div>
+          <div className='playerlob border-b'>
+            <h2>Joueurs :</h2>
+            {players.map((player, index) => (
+                <div className='playerbubble' key={index}>{player}</div>
+            ))}
+          </div>
 
-      {/* Si l'utilisateur est l'hôte, afficher un bouton pour démarrer la partie */}
-      {host && currentPlayerName === host && (
-  <div className='buttonplay'>
-    <button onClick={handleStartGame}>Démarrer la partie</button>
-  </div>
-)}
-      <div className='parambutton'>
-        <button onClick={() => setShowSettings(true)}>Paramètres</button>
-      </div>
-     
-
-      {showSettings && (
-        <div className="popup-overlay">
-          <div className="popup-content">
-            <h2>Paramètres du jeu</h2>
-            <div>
-              <label>Difficiulté :</label>
-              <select
-                value={settings.difficulty}
-                onChange={(e) => handleSettingChange('difficulty', e.target.value)}
-                disabled={!isHost} // Disable for non-hosts
+          <div className="chatlob border-b">
+            <div className="chat">
+              {chatMessages.map((msg, index) => (
+                  <ChatMessage key={index} username={msg.playerName} message={msg.message} timestamp={msg.timestamp} />
+              ))}
+            </div>
+            <div className="chat-input-container">
+              <input
+                  type="text"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      const input = e.target as HTMLInputElement;
+                      const message = input.value.trim();
+                      if (message !== '') {
+                        handleSendMessage(message);
+                        input.value = '';
+                      }
+                    }
+                  }}
+                  placeholder="Type your message..."
+                  className="chat-input"
+              />
+              <button
+                  onClick={() => {
+                    const input = document.querySelector('.chat-input') as HTMLInputElement;
+                    const message = input.value.trim();
+                    if (message !== '') {
+                      handleSendMessage(message);
+                      input.value = '';
+                    }
+                  }}
+                  className="chat-send-button"
               >
-                <option value="easy">Facile</option>
-                <option value="normal">Normal</option>
-                <option value="hard">Difficile</option>
-              </select>
-            </div>
-        
-            <div>
-              <label>Temps limite (en secondes) :</label>
-              <input
-                type="number"
-                value={settings.timeLimit}
-                onChange={(e) => handleSettingChange('timeLimit', parseInt(e.target.value))}
-                min="30"
-                disabled={!isHost} // Disable for non-hosts
-              />
-            </div>
-        
-            <div>
-              <label>Nombre de sites à visiter :</label>
-              <input
-                type="number"
-                value={settings.sitesToVisit}
-                onChange={(e) => handleSettingChange('sitesToVisit', parseInt(e.target.value))}
-                min="1"
-                disabled={!isHost} // Disable for non-hosts
-              />
-            </div>
-            <div className="popup-buttons">
-              <button onClick={() => setShowSettings(false)}>Back</button>
-              <button onClick={() => { setShowSettings(false); updatePartySettings(settings); }}>Confirmer</button>
+                Send
+              </button>
             </div>
           </div>
+
+          <div className='bouttonback'><button onClick={handleLeaveParty}>BACK</button></div>
+
+          {host && currentPlayerName === host && (
+              <div className='buttonplay'>
+                <button onClick={handleStartGame}>Démarrer la partie</button>
+              </div>
+          )}
+
+          <div className='parambutton'>
+            <button onClick={() => setShowSettings(true)}>Paramètres</button>
+          </div>
+
+          {showSettings && (
+              <div className="popup-overlay">
+                <div className="popup-content">
+                  <h2>Paramètres du jeu</h2>
+                  <div>
+                    <label>Difficulté :</label>
+                    <select
+                        value={settings.difficulty}
+                        onChange={(e) => handleSettingChange('difficulty', e.target.value)}
+                        disabled={!isHost}
+                    >
+                      <option value="easy">Facile</option>
+                      <option value="normal">Normal</option>
+                      <option value="hard">Difficile</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label>Temps limite (en secondes) :</label>
+                    <input
+                        type="number"
+                        value={settings.timeLimit}
+                        onChange={(e) => handleSettingChange('timeLimit', parseInt(e.target.value))}
+                        min="30"
+                        disabled={!isHost}
+                    />
+                  </div>
+
+                  <div>
+                    <label>Nombre de sites à visiter :</label>
+                    <input
+                        type="number"
+                        value={settings.sitesToVisit}
+                        onChange={(e) => handleSettingChange('sitesToVisit', parseInt(e.target.value))}
+                        min="1"
+                        disabled={!isHost}
+                    />
+                  </div>
+                  <div className="popup-buttons">
+                    <button onClick={() => setShowSettings(false)}>Back</button>
+                    <button onClick={() => { setShowSettings(false); updatePartySettings(settings); }}>Confirmer</button>
+                  </div>
+                </div>
+              </div>
+          )}
+
+          {showArtifactDescription && selectedArtifact && (
+              <div className="popup-overlay">
+                <div className="popup-content artifact-description">
+                  <h2>{selectedArtifact.name}</h2>
+                  <p>{selectedArtifact.description}</p>
+                  <p className={`artifact-type ${selectedArtifact.type}`}>
+                    Type: {selectedArtifact.type === 'positive' ? 'Positif' : 'Négatif'}
+                  </p>
+                  <div className="popup-buttons">
+                    <button onClick={() => setShowArtifactDescription(false)}>Fermer</button>
+                  </div>
+                </div>
+              </div>
+          )}
         </div>
-      )}
-
-    </div> 
-    </div>
-
+      </div>
   );
 };
 
